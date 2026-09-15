@@ -1,0 +1,38 @@
+# macOS 系统生成文件
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# 环境变量与密钥
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+secrets.*
+credentials*
+*secret*
+*token*.txt
+
+# 数据库与用户数据
+*.sql
+*.sqlite
+*.sqlite3
+*.db
+*.csv
+
+# 依赖与构建产物
+node_modules/
+dist/
+build/
+out/
+
+# 编辑器与系统临时文件
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+Thumbs.db

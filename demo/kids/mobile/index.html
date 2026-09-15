@@ -1,0 +1,1243 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>孩子学习平台 · 手机端一期完整交互原型</title>
+<style>
+:root{
+  --brand:#FFD84D; --brand2:#F6C52B; --brand-soft:#FFF5C7;
+  --bg:#FBF8EF; --card:#FFFDF8; --ink:#26353C; --sub:#77868D;
+  --line:#ECE3D2; --green:#58BE94; --green-soft:#E8F7EF;
+  --blue:#79B7ED; --blue-soft:#EDF6FF; --violet:#9B82DC; --violet-soft:#F3EEFF;
+  --pink:#E99BC0; --pink-soft:#FFF0F7; --orange:#EEA644; --danger:#DE6B5B;
+  --shadow:0 8px 24px rgba(66,49,17,.07); --r:18px;
+  --header-h:58px; --nav-h:72px;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+button,input{font:inherit;color:inherit} button{border:0;background:none}
+body{display:flex;justify-content:center}
+.app{width:100%;max-width:430px;height:100dvh;min-height:0;display:flex;flex-direction:column;overflow:hidden;
+  background:radial-gradient(circle at 95% -6%,rgba(255,219,82,.24),transparent 24%),linear-gradient(#FFFDF9,#FBF8EF)}
+.topbar{height:calc(var(--header-h) + env(safe-area-inset-top));padding:calc(8px + env(safe-area-inset-top)) 15px 8px;
+  flex:0 0 auto;display:flex;align-items:center;gap:10px;background:rgba(255,253,249,.97);border-bottom:1px solid rgba(236,227,210,.8);z-index:20}
+.profile{display:flex;align-items:center;gap:9px;min-width:0;flex:1;text-align:left}
+.avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(#FFE46E,#F6C83A);display:grid;place-items:center;font-size:21px;
+  box-shadow:inset 0 -3px 0 rgba(150,105,0,.1)}
+.name{font-weight:900;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chev{font-size:11px;color:#9B8E75}
+.energy-btn{padding:7px 10px;border-radius:999px;background:#fff;border:1px solid #EEE5D3;font-size:12px;font-weight:900;white-space:nowrap}
+.main{flex:1 1 auto;min-height:0;position:relative;overflow:hidden}
+.page{display:none;height:100%;overflow-y:auto;padding:10px 16px 18px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.page.active{display:block}
+.bottomnav{height:calc(var(--nav-h) + env(safe-area-inset-bottom));padding:6px 9px calc(6px + env(safe-area-inset-bottom));flex:0 0 auto;
+  display:grid;grid-template-columns:repeat(4,1fr);background:rgba(255,255,255,.98);border-top:1px solid #ECE4D7;box-shadow:0 -4px 16px rgba(59,44,16,.05);z-index:20}
+.nav{border-radius:15px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10px;color:#6F7D84;font-weight:800}
+.nav i{font-style:normal;font-size:20px}.nav.active{background:#FFF4C3;color:#584807}
+
+/* common */
+.small{font-size:11px;color:var(--sub)} .eyebrow{font-size:10px;color:#7D8C92;font-weight:900;letter-spacing:.03em}
+.link{font-size:11px;color:#6C7B82;font-weight:850;padding:4px 0}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin:12px 2px 7px}.section-head h2{font-size:16px;margin:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.primary{height:48px;border-radius:15px;background:linear-gradient(#FFE36B,#F9CE32);font-weight:950;font-size:15px;box-shadow:0 7px 16px rgba(224,174,13,.18)}
+.secondary{height:46px;border-radius:15px;background:#fff;border:1px solid #E8DFCE;font-weight:850}
+.pill{padding:4px 7px;border-radius:999px;background:#FFF3C0;color:#7C640B;font-size:9px;font-weight:900}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:92px;background:#28363C;color:#fff;padding:9px 13px;border-radius:999px;
+  font-size:11px;opacity:0;pointer-events:none;transition:.2s;z-index:200;max-width:85%;text-align:center}
+.toast.show{opacity:1}
+
+/* today */
+.today-stage{padding:13px 14px 11px;background:linear-gradient(145deg,#F4FBF7,#EEF8FF 55%,#FFF4CA);border:1px solid #E7E2D4;border-radius:20px;box-shadow:var(--shadow)}
+.stage-top{display:flex;justify-content:space-between;gap:8px}.stage-title{font-size:24px;font-weight:950;margin-top:2px}.stage-pet{font-size:43px}
+.stage-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}.stage-meta span{font-size:9px;padding:4px 6px;border-radius:999px;background:rgba(255,255,255,.72);border:1px solid #E8E1D3;color:#6F7F85}
+.route{display:grid;grid-template-columns:auto 1fr auto;gap:7px;align-items:center;margin-top:9px}.route>span{font-size:24px}.route-line{height:7px;border-radius:999px;background:#E5E1D6;overflow:hidden}.route-line i{display:block;width:40%;height:100%;background:linear-gradient(90deg,#56BD93,#90D7B9);border-radius:999px}
+.stage-msg{margin-top:7px;padding:7px 9px;border-radius:13px;background:rgba(255,247,215,.85);font-size:10px;font-weight:750;color:#74611B}
+.task-list{display:flex;flex-direction:column;gap:8px}.task{display:flex;align-items:center;gap:9px;padding:10px;border:1px solid #EAE1CF;border-radius:16px;background:#FFFDF9;box-shadow:0 3px 13px rgba(62,45,15,.035)}
+.task.done{background:#F2FAF6;border-color:#D0E9DA}.task.fixed{background:#F7F2FF;border-color:#E0D2F2}
+.check{width:25px;height:25px;border-radius:9px;border:2px solid #DDD3C1;background:white;display:grid;place-items:center;font-size:15px;font-weight:950;color:#fff;flex:0 0 auto}
+.task.done .check{background:var(--green);border-color:var(--green)}.task-icon{width:34px;height:34px;border-radius:12px;background:#FFF5CF;display:grid;place-items:center;font-size:18px}
+.task-main{flex:1;min-width:0}.task-name{font-size:14px;font-weight:900}.task-meta{font-size:10px;color:var(--sub);margin-top:2px}
+.handle{display:none;color:#B9AF9B}.sort-mode .handle{display:block}.task-actions{display:flex;align-items:center;gap:5px}
+.start-btn{width:33px;height:33px;border-radius:11px;background:#FFF2A8;display:grid;place-items:center;font-size:13px;font-weight:950}
+.start-all{width:100%;margin-top:10px}
+.sort-hint{display:none;margin:0 0 7px;padding:8px 9px;border-radius:12px;background:#FFF8DE;border:1px dashed #E2C95F;color:#6D620C;font-size:10px}.sort-hint.show{display:block}
+
+/* reading */
+.read-main{padding:13px 14px 10px;background:linear-gradient(145deg,#FFF8CF,#FFFCEA 68%,#F8FCF8);border:1px solid #EFE1B2;border-radius:20px;box-shadow:var(--shadow)}
+.read-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.book-name{font-size:18px;font-weight:950;margin-top:3px}
+.read-row{display:flex;gap:12px;margin-top:9px}.cover{width:74px;height:100px;border-radius:12px;background:linear-gradient(145deg,#5D9DB6,#75C2D6);color:white;display:grid;place-items:center;text-align:center;font-size:12px;font-weight:900;padding:7px;box-shadow:0 6px 13px rgba(47,99,120,.16)}
+.read-info{flex:1}.read-info .small{margin-top:4px}.read-progress{height:6px;background:#DCE7E7;border-radius:999px;overflow:hidden;margin-top:8px}.read-progress i{display:block;width:0;height:100%;background:#7CC8B1}
+.read-main .primary{width:100%;margin-top:9px;height:42px}.pet-line{display:flex;gap:8px;align-items:center;margin-top:9px;padding-top:8px;border-top:1px solid rgba(226,214,175,.7);font-size:11px;font-weight:750}
+.mini-pet{width:32px;height:32px;border-radius:50%;background:#FFE46D;display:grid;place-items:center}
+.recent-books{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.recent-book{text-align:left;min-width:0}
+.recent-cover{height:90px;border-radius:13px;display:grid;place-items:center;text-align:center;color:#fff;font-size:11px;font-weight:900;padding:6px;background:linear-gradient(145deg,#8C70C6,#6852A0)}
+.recent-cover.bus{background:linear-gradient(145deg,#FFE8A4,#F4C666);font-size:32px}.recent-cover.pig{background:linear-gradient(145deg,#DDF4F1,#BFE4DF);font-size:29px}
+.recent-title{font-size:10px;font-weight:850;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.state-tag{display:inline-block;margin-top:3px;padding:2px 6px;border-radius:999px;background:#F0EEE9;font-size:8px;color:#7F8A8E;font-weight:850}
+.recent-book.active .recent-cover{outline:2px solid #EFCB39;outline-offset:2px}.recent-book.active .state-tag{background:#E4F5EB;color:#4E9B79}
+.path-card{width:100%;margin-top:8px;display:grid;grid-template-columns:35px 1fr auto;gap:9px;align-items:center;text-align:left;padding:11px 12px;border-radius:16px;border:1px solid #DCE8E4;background:linear-gradient(145deg,#F1FAFF,#EAF8F0)}
+.path-card.en{background:linear-gradient(145deg,#F3EEFF,#FFF6D6);border-color:#E4D8F3}.path-card>span:first-child{font-size:22px}.path-card b{display:block;font-size:13px}.path-card small{display:block;font-size:9px;color:#738389;margin-top:2px}.path-card>span:last-child{font-size:22px;color:#859298}
+
+/* challenge */
+.challenge-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.challenge-card{min-height:126px;border-radius:18px;border:2px solid transparent;padding:14px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.challenge-card .ci{font-size:33px}.challenge-card b{font-size:14px;margin-top:5px}.challenge-card small{font-size:10px;color:#667981;margin-top:3px}
+.c1{background:var(--pink-soft);border-color:#E6A3C1}.c2{background:var(--blue-soft);border-color:#82BCEB}.c3{background:#F1EEFF;border-color:#AA91E3}.c4{background:#FFF3D7;border-color:#EEC16F}
+.poem-entry{width:100%;margin-top:9px;display:grid;grid-template-columns:37px 1fr auto;gap:9px;align-items:center;text-align:left;padding:11px 12px;border-radius:16px;background:linear-gradient(145deg,#F4EEFF,#FFF8D8);border:1px solid #E1D6F1}
+.poem-entry>span:first-child{font-size:21px}.poem-entry b{display:block;font-size:13px}.poem-entry small{display:block;font-size:9px;color:#75858B;margin-top:2px}.poem-entry>span:last-child{font-size:22px;color:#80749A}
+.record{width:100%;display:flex;align-items:center;gap:8px;padding:9px 10px;background:#fff;border:1px solid #ECE4D4;border-radius:14px;margin-top:6px;text-align:left}.record-main{flex:1}.record-main b{display:block;font-size:11px}.record-main small{font-size:9px;color:#869297}
+
+/* shop */
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:1px 0 8px}.chips::-webkit-scrollbar{display:none}.chip{padding:7px 10px;border-radius:999px;background:#fff;border:1px solid #EDE4D1;font-size:10px;font-weight:900;white-space:nowrap}.chip.active{background:#FFF0A6;border-color:#EDCB46}
+.reward-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.reward{min-height:132px;padding:10px;text-align:center;border:1px solid #EDE2CC;border-radius:17px;background:#fff}.ri{font-size:25px}.reward b{display:block;font-size:12px;margin-top:4px}.reward p{height:28px;margin:4px 0;font-size:9px;color:#7C898E}
+.apply{width:100%;height:34px;border-radius:11px;background:#FFE15F;font-size:11px;font-weight:950}.reward.insufficient .apply{background:#F0E9D8;color:#9B8E74}
+
+/* secondary full pages */
+.overlay-page{display:none;position:absolute;inset:0;z-index:50;background:linear-gradient(#FFFDF9,#FBF8EF);overflow-y:auto;-webkit-overflow-scrolling:touch}
+.overlay-page.active{display:block}.subbar{position:sticky;top:0;z-index:8;min-height:58px;padding:9px 14px;display:grid;grid-template-columns:38px 1fr auto;gap:9px;align-items:center;background:rgba(255,253,249,.96);backdrop-filter:blur(12px);border-bottom:1px solid #ECE4D6}
+.back{width:36px;height:36px;border-radius:12px;background:#fff;border:1px solid #EAE1D0;font-size:20px}.subbar h2{font-size:16px;margin:0}.subbar .right{font-size:10px;font-weight:900;color:#6D7B82}
+.subcontent{padding:12px 16px 24px}
+
+/* task runner */
+.runner-hero{text-align:center;padding:12px 0 4px}.train{font-size:65px}.runner-card{padding:16px;text-align:center}.runner-card .emoji{font-size:37px}.runner-card h3{font-size:21px;margin:5px 0 2px}
+.timer-ring{width:150px;height:150px;margin:14px auto;border-radius:50%;background:conic-gradient(var(--brand) 0 58%,#EFE8D7 58%);display:grid;place-items:center}.timer-inner{width:123px;height:123px;border-radius:50%;background:#fff;display:grid;place-items:center}.timer{font-size:28px;font-weight:950}.runner-msg{padding:9px 10px;border-radius:13px;background:#FFF7D8;font-size:11px;font-weight:750;color:#74611B}
+.dual{display:grid;grid-template-columns:1fr 1.35fr;gap:8px;margin-top:10px}
+
+/* reading session */
+.reading-session{text-align:center}.big-cover{width:128px;height:174px;border-radius:17px;margin:10px auto;background:linear-gradient(145deg,#5E9FB7,#79C5D9);color:white;display:grid;place-items:center;text-align:center;padding:12px;font-size:17px;font-weight:950;box-shadow:0 10px 22px rgba(51,103,125,.18)}
+.reading-session h3{font-size:20px;margin:8px 0 2px}.read-time{font-size:34px;font-weight:950;margin:14px 0 4px}.soft-note{font-size:11px;color:#7D8A90}
+.reading-session-actions{display:grid;grid-template-columns:1fr 1.3fr;gap:8px;margin-top:14px}
+
+/* bookshelf */
+.shelf-current{padding:12px;display:grid;grid-template-columns:58px 1fr;gap:10px;align-items:center}.mini-cover2{width:58px;height:78px;border-radius:10px;background:linear-gradient(145deg,#5F9FB8,#77C2D5);color:#fff;display:grid;place-items:center;text-align:center;font-size:9px;font-weight:900;padding:5px}
+.shelf-list{display:flex;flex-direction:column;gap:7px;margin-top:10px}.shelf-row{display:grid;grid-template-columns:45px 1fr auto;gap:9px;align-items:center;padding:8px 9px;border:1px solid #EAE2D3;border-radius:14px;background:#fff}.shelf-cover{width:45px;height:58px;border-radius:8px;display:grid;place-items:center;text-align:center;background:#EAE4F7;font-size:9px;font-weight:850}.shelf-row b{font-size:12px}.shelf-row small{display:block;font-size:9px;color:#7E8B90;margin-top:2px}.set-current{padding:6px 8px;border-radius:10px;background:#FFF2A7;font-size:9px;font-weight:900}.set-current.active{background:#E7F5EC;color:#4D9979}
+
+/* journeys */
+.journey-hero{padding:14px;background:linear-gradient(145deg,#EEF9FF,#EBF8F0);border-radius:19px;border:1px solid #DCE8E3}.journey-hero h3{font-size:20px;margin:4px 0 2px}.journey-progress{height:8px;background:#DCE7E2;border-radius:999px;overflow:hidden;margin-top:10px}.journey-progress i{display:block;width:42%;height:100%;background:#67C49F}
+.milestones{display:flex;flex-direction:column;gap:8px;margin-top:12px}.milestone{display:grid;grid-template-columns:35px 1fr auto;gap:9px;align-items:center;padding:10px;border-radius:14px;background:#fff;border:1px solid #EAE3D6}.milestone .icon{font-size:21px}.milestone b{font-size:12px}.milestone small{display:block;font-size:9px;color:#7A888D}.milestone .status{font-size:9px;font-weight:900;color:#5E9E82}
+.star-hero{background:linear-gradient(145deg,#F3EEFF,#FFF6D5)}.stars{font-size:26px;letter-spacing:3px;margin-top:10px}.english-books{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}.english-book{padding:11px;border-radius:15px;background:#fff;border:1px solid #E8E1D4}.english-book b{font-size:11px}.english-book small{display:block;font-size:9px;color:#7E8B90;margin-top:3px}
+
+/* challenge session */
+.challenge-shell{min-height:calc(100dvh - 58px);display:flex;flex-direction:column}.challenge-progress{height:6px;border-radius:999px;background:#ECE7DB;overflow:hidden}.challenge-progress i{display:block;width:30%;height:100%;background:linear-gradient(90deg,#8F78D2,#D39DC1)}
+.question-card{margin-top:14px;padding:18px 14px;text-align:center}.question-type{font-size:10px;color:#7E8C92;font-weight:900}.question{font-size:30px;font-weight:950;margin:20px 0}.question.sub{font-size:20px}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:8px}.choice{min-height:50px;border-radius:14px;border:1px solid #E5DDCD;background:#fff;font-size:15px;font-weight:900}.choice.correct{background:#E9F7F0;border-color:#74C5A3}.choice.wrong{background:#FFF0ED;border-color:#E39B8E}
+.listen-btn{width:76px;height:76px;border-radius:50%;margin:18px auto 12px;background:#EAF4FF;border:2px solid #83BCE8;font-size:30px;display:grid;place-items:center}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}.key{height:46px;border-radius:12px;background:#fff;border:1px solid #E6DECF;font-size:18px;font-weight:900}.answer-box{height:52px;border-radius:14px;background:#FFF9E3;border:1px solid #ECD36D;display:grid;place-items:center;font-size:23px;font-weight:950;margin:10px 0}
+.feedback{min-height:36px;margin-top:10px;padding:9px;border-radius:12px;background:#FFF7D9;font-size:11px;font-weight:800;color:#71631A}
+.challenge-next{margin-top:auto;padding-top:12px}.challenge-next .primary{width:100%}
+
+
+/* V10：阅读中英文分场景；闯关补齐“不会→教学卡→再试一次” */
+.reading-switch{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:4px;
+  margin:1px 0 9px;
+  padding:3px;
+  border-radius:14px;
+  background:#F3F0E9;
+}
+.reading-switch-btn{
+  height:36px;
+  border-radius:11px;
+  font-size:11px;
+  font-weight:900;
+  color:#758188;
+}
+.reading-switch-btn.active{
+  background:#FFF4B8;
+  color:#594909;
+  box-shadow:0 2px 6px rgba(87,68,13,.05);
+}
+.reading-mode{display:none}
+.reading-mode.active{display:block}
+
+.journey-summary-card{
+  width:100%;
+  margin-top:9px;
+  display:grid;
+  grid-template-columns:38px 1fr auto;
+  gap:9px;
+  align-items:center;
+  padding:12px;
+  border-radius:17px;
+  border:1px solid #DCE7E3;
+  background:linear-gradient(145deg,#F1FAFF,#EAF8F0);
+  text-align:left;
+}
+.journey-summary-icon{font-size:25px}
+.journey-summary-main{min-width:0}
+.journey-summary-title{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:8px;
+}
+.journey-summary-title b{font-size:13px}
+.journey-summary-title span{font-size:10px;font-weight:900;color:#4E8C72}
+.journey-summary-main small{display:block;font-size:9px;color:#718187;margin-top:4px}
+.journey-summary-arrow{font-size:23px;color:#849197}
+.mini-track{
+  height:6px;
+  border-radius:999px;
+  background:#DDE8E3;
+  overflow:hidden;
+  margin-top:7px;
+}
+.mini-track i{
+  display:block;
+  height:100%;
+  border-radius:999px;
+  background:#68C39F;
+}
+.english-summary{
+  background:linear-gradient(145deg,#F3EEFF,#FFF6D6);
+  border-color:#E4D8F2;
+}
+.mini-stars{
+  font-size:14px;
+  letter-spacing:1px;
+  margin-top:5px;
+  white-space:nowrap;
+}
+
+.english-current-card{
+  padding:13px 14px;
+  border-radius:19px;
+  border:1px solid #E1D8F0;
+  background:linear-gradient(145deg,#F4EEFF,#FFF8D9);
+  box-shadow:var(--shadow);
+}
+.english-current-head{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:flex-start;
+}
+.english-series-name{font-size:16px;font-weight:950;margin-top:3px}
+.series-switch{
+  padding:6px 8px;
+  border-radius:10px;
+  background:#fff;
+  border:1px solid #E7DFD2;
+  font-size:9px;
+  font-weight:900;
+  white-space:nowrap;
+}
+.english-today-row{
+  margin-top:12px;
+  padding:10px;
+  border-radius:14px;
+  background:rgba(255,255,255,.7);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+.english-today-row b{display:block;font-size:13px}
+.english-today-row small{display:block;font-size:9px;color:#76868C;margin-top:2px}
+.english-today-stars{font-size:20px;white-space:nowrap}
+.english-next-book{
+  margin-top:9px;
+  display:grid;
+  grid-template-columns:45px 1fr auto;
+  gap:9px;
+  align-items:center;
+}
+.english-next-cover{
+  width:45px;height:58px;border-radius:9px;
+  display:grid;place-items:center;
+  background:linear-gradient(145deg,#745BAC,#9C81D2);
+  color:#fff;font-weight:950;
+}
+.english-next-book b{display:block;font-size:11px}
+.english-next-book small{display:block;font-size:9px;color:#77868D;margin-top:2px}
+.english-start-btn{
+  padding:7px 8px;
+  border-radius:10px;
+  background:#FFE067;
+  font-size:9px;
+  font-weight:950;
+}
+.english-recent-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+.english-recent-book{text-align:left;min-width:0}
+.english-recent-cover{
+  height:92px;
+  border-radius:13px;
+  display:grid;place-items:center;
+  background:linear-gradient(145deg,#785FAF,#A189D3);
+  color:#fff;font-weight:950;
+}
+.english-recent-cover.alt{background:linear-gradient(145deg,#5D8FB7,#7CB9D0)}
+.english-recent-cover.soft{background:linear-gradient(145deg,#E0B05E,#F2D58C);color:#57440B}
+.english-recent-book b{
+  display:block;font-size:10px;margin-top:5px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.english-recent-book small{font-size:8px;color:#7C898E}
+
+.challenge-record-list{display:flex;flex-direction:column;gap:7px}
+.full-record{width:100%;text-align:left;margin-top:0}
+.record-right{display:flex;align-items:center;gap:6px}
+.row-arrow{font-size:18px;color:#8C979B}
+
+.dont-know-btn{
+  width:fit-content;
+  align-self:center;
+  margin:11px auto 0;
+  padding:8px 13px;
+  border-radius:999px;
+  border:1px solid #B9D9CF;
+  background:#F7FCFA;
+  color:#427B6A;
+  font-size:11px;
+  font-weight:900;
+}
+.challenge-feedback-lite{
+  min-height:0;
+  margin-top:10px;
+  font-size:11px;
+  color:#69787E;
+  text-align:center;
+}
+.teach-card{
+  border-radius:20px;
+  border:1px solid #D9E8D4;
+  background:linear-gradient(145deg,#FBFCF2,#F3FAF4);
+  padding:18px 16px;
+}
+.teach-card .teach-kicker{
+  color:#387D68;
+  font-size:12px;
+  font-weight:950;
+}
+.teach-card .teach-main{
+  margin-top:12px;
+  font-size:28px;
+  font-weight:950;
+}
+.teach-card .teach-main em{
+  font-style:normal;
+  font-size:20px;
+  color:#537B73;
+  margin-left:4px;
+}
+.teach-card .teach-examples{
+  margin-top:14px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.teach-card .teach-examples span{
+  display:block;
+  padding:10px 12px;
+  border-radius:13px;
+  background:rgba(255,255,255,.8);
+  font-size:13px;
+  font-weight:850;
+}
+.teach-note{
+  margin-top:10px;
+  font-size:10px;
+  line-height:1.6;
+  color:#7A8790;
+}
+.teach-retry-btn{width:100%;margin-top:14px}
+
+.series-card{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:12px;border-radius:15px;background:#fff;border:1px solid #E7DFD2;margin-bottom:8px;
+}
+.series-card.active-series{background:#F4EEFF;border-color:#DCCEF0}
+.series-card b{display:block;font-size:12px}
+.series-card small{display:block;font-size:9px;color:#7A888E;margin-top:2px}
+.series-book-list{display:flex;flex-direction:column;gap:7px;margin-top:12px}
+.series-book-row{
+  display:grid;grid-template-columns:42px 1fr auto;gap:9px;align-items:center;
+  padding:9px 10px;border-radius:14px;background:#fff;border:1px solid #E9E1D4;text-align:left
+}
+.series-book-cover{
+  width:42px;height:52px;border-radius:8px;background:#7E68B2;color:#fff;display:grid;place-items:center;font-size:10px;font-weight:950
+}
+.series-book-row b{font-size:11px}.series-book-row small{display:block;font-size:9px;color:#7F8B90;margin-top:2px}
+/* challenge result */
+.result{text-align:center;padding-top:22px}.result .big{font-size:55px}.result h3{font-size:23px;margin:7px 0}.result-score{font-size:38px;font-weight:950}.result-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:14px}.result-grid>div{padding:10px;border-radius:14px;background:#fff;border:1px solid #E9E1D3}.result-grid span{display:block;font-size:9px;color:#7D898F}.result-grid b{display:block;font-size:15px;margin-top:2px}
+
+/* poem map */
+.poem-stage-switch{display:grid;grid-template-columns:1.15fr .85fr;gap:8px}.poem-stage{padding:10px 11px;border-radius:15px;border:1px solid #DFD4EF;background:linear-gradient(145deg,#F4EEFF,#FFF8DC)}.poem-stage.locked{background:#F6F4EF;border-color:#E5E0D7;opacity:.78}.poem-stage b{font-size:12px}.poem-stage small{display:block;font-size:9px;color:#7C898E;margin-top:3px}
+.poem-progress{height:7px;background:#ECE7DF;border-radius:999px;overflow:hidden;margin:9px 2px}.poem-progress i{display:block;width:23%;height:100%;background:linear-gradient(90deg,#9E85D8,#E0AFD2)}
+.poem-list{position:relative;display:flex;flex-direction:column;gap:7px;padding:5px 0 30px 8px}.poem-list:before{content:"";position:absolute;left:27px;top:25px;bottom:38px;width:3px;background:#E1D8EF;border-radius:999px}
+.poem-row{position:relative;z-index:2;display:grid;grid-template-columns:40px 1fr auto;gap:9px;align-items:center;padding:8px 10px 8px 7px;border-radius:15px;background:#fff;border:1px solid #E9E2D4;text-align:left}.poem-row.learning{background:linear-gradient(145deg,#F8F3FF,#FFF9E4);border-color:#D7C4F0}.poem-index{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#F2EFE8;border:3px solid #FFFDF9;font-size:11px;font-weight:950}.poem-row.done .poem-index{background:#E4F5EB;color:#4D9879}.poem-row.learning .poem-index{background:#E8DDF8;color:#7255A0}
+.poem-main b{font-size:13px}.poem-main em{font-style:normal;font-size:9px;color:#849096;margin-left:6px}.poem-status{padding:4px 6px;border-radius:999px;background:#F0EEE8;font-size:8px;font-weight:900;color:#847B6C}.poem-row.done .poem-status{background:#E5F4EB;color:#4E9979}.poem-row.learning .poem-status{background:#ECE3F9;color:#7153A0}
+.poem-detail{text-align:center}.poem-detail h3{font-size:23px;margin:12px 0 2px}.poem-lines{margin-top:14px;padding:15px;border-radius:16px;background:#FBF8F1;font-family:"STKaiti","KaiTi","PingFang SC",serif;font-size:20px;line-height:2}
+.status-label{margin-top:12px;text-align:left;font-size:11px;font-weight:900}.status-options{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:7px}.status-opt{height:40px;border-radius:12px;background:#fff;border:1px solid #E4DCCF;font-size:10px;font-weight:900}.status-opt.active{background:#FFF0AE;border-color:#EAC84D;color:#6D5909}
+
+/* sheets */
+.mask{display:none;position:fixed;inset:0;z-index:120;background:rgba(31,38,41,.42);align-items:flex-end;justify-content:center}.mask.active{display:flex}
+.sheet{width:100%;max-width:430px;background:#fff;border-radius:22px 22px 0 0;padding:14px 16px calc(16px + env(safe-area-inset-bottom))}
+.sheet-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.sheet-head h3{font-size:18px;margin:2px 0}.x{width:34px;height:34px;border-radius:11px;background:#F3F0E9;font-size:21px}
+.sheet-item{width:100%;min-height:52px;border-radius:14px;background:#F8F6F0;margin-top:7px;padding:9px 11px;display:flex;align-items:center;gap:9px;text-align:left}.sheet-item>span:first-child{font-size:20px}.sheet-item b{display:block;font-size:12px}.sheet-item small{display:block;font-size:9px;color:#7F8C91;margin-top:2px}
+.energy-box{margin-top:10px;padding:13px;border-radius:17px;background:linear-gradient(145deg,#FFF5C4,#F8FBF5);border:1px solid #E8D88C}.energy-box>span{font-size:10px;color:#7F8871}.energy-box>strong{display:block;font-size:32px;line-height:1.1}.energy-mini{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}.energy-mini>div{padding:8px;border-radius:12px;background:rgba(255,255,255,.72);font-size:9px;color:#7C888D}.energy-mini b{display:block;font-size:13px;color:var(--ink);margin-top:2px}
+.ledger{margin-top:12px;display:flex;flex-direction:column;gap:6px}.ledger-row{display:grid;grid-template-columns:31px 1fr auto;gap:8px;align-items:center;padding:8px 9px;border-radius:13px;background:#FAF9F5;border:1px solid #EEE7D9}.ledger-row .ico{width:31px;height:31px;border-radius:10px;background:#FFF3C1;display:grid;place-items:center}.ledger-row b{font-size:10px}.ledger-row small{display:block;font-size:8px;color:#899498;margin-top:2px}.amt{font-size:11px;font-weight:950}.gain{color:#4D9D7B}.spend{color:#CE7740}
+.redeem-sheet{text-align:center}.redeem-sheet .ri{font-size:42px}.redeem-sheet h3{margin:5px 0}.redeem-sheet .primary{width:100%;margin-top:12px}.remain{display:inline-block;margin-top:10px;padding:6px 9px;border-radius:999px;background:#FFF6D4;font-size:10px;color:#766318}
+
+/* add to home */
+.guide-box{padding:12px;border-radius:15px;background:#FFF8DD;border:1px solid #E9D489;font-size:10px;line-height:1.6;color:#6F6217}
+.guide-steps{display:flex;flex-direction:column;gap:7px;margin-top:10px}.guide-step{display:grid;grid-template-columns:27px 1fr;gap:8px;align-items:start;padding:9px;border-radius:13px;background:#fff;border:1px solid #E9E1D2}.num{width:27px;height:27px;border-radius:50%;background:#FFF0AA;display:grid;place-items:center;font-size:10px;font-weight:950}.guide-step b{font-size:11px}.guide-step small{display:block;font-size:9px;color:#7D8A90;margin-top:2px}
+
+/* desktop preview */
+
+/* V11：统一手机端视觉规范
+   字号：11 / 12 / 14 / 16 / 20 / 24
+   间距：4 / 8 / 12 / 16 / 20 / 24
+   圆角：12 / 16 / 20
+   主要操作高度：48；普通点击区至少40~44
+*/
+:root{
+  --fs-xs:11px;
+  --fs-sm:12px;
+  --fs-md:14px;
+  --fs-lg:16px;
+  --fs-xl:20px;
+  --fs-hero:24px;
+  --sp-1:4px;
+  --sp-2:8px;
+  --sp-3:12px;
+  --sp-4:16px;
+  --sp-5:20px;
+  --sp-6:24px;
+  --radius-sm:12px;
+  --radius-md:16px;
+  --radius-lg:20px;
+  --touch:44px;
+}
+body{font-size:var(--fs-md);line-height:1.4}
+.page{padding:var(--sp-3) var(--sp-4) var(--sp-5)}
+.section-head{margin:var(--sp-4) 2px var(--sp-2)}
+.section-head h2{font-size:var(--fs-lg);line-height:1.25}
+.eyebrow,.small{font-size:var(--fs-xs);line-height:1.4}
+.link{font-size:var(--fs-sm);min-height:36px;display:inline-flex;align-items:center}
+.primary{height:48px;border-radius:var(--radius-sm);font-size:var(--fs-md)}
+.secondary{height:44px;border-radius:var(--radius-sm);font-size:var(--fs-sm)}
+.card,.read-main,.english-current-card,.today-stage{border-radius:var(--radius-lg)}
+.task,.record,.journey-summary-card,.poem-entry,.series-card,.series-book-row{border-radius:var(--radius-md)}
+.task{padding:var(--sp-3)}
+.task-name{font-size:var(--fs-md)}
+.task-meta{font-size:var(--fs-xs)}
+.stage-title{font-size:var(--fs-hero)}
+.book-name{font-size:var(--fs-lg)}
+.read-row{gap:var(--sp-3);margin-top:var(--sp-3)}
+.pet-line{font-size:var(--fs-xs)}
+.reading-switch{margin-bottom:var(--sp-3)}
+.reading-switch-btn{height:40px;font-size:var(--fs-sm)}
+.recent-books{gap:var(--sp-2)}
+.recent-cover{height:96px;border-radius:var(--radius-sm);font-size:var(--fs-xs)}
+.recent-title{font-size:var(--fs-xs);margin-top:6px}
+.recent-action{
+  width:100%;
+  min-height:32px;
+  margin-top:5px;
+  padding:5px 4px;
+  border-radius:10px;
+  background:#FFF3B5;
+  color:#66530A;
+  font-size:10px;
+  font-weight:900;
+}
+.recent-action.current{
+  background:#E6F5EC;
+  color:#4D9878;
+}
+.recent-action:disabled{opacity:1}
+.journey-summary-card{padding:var(--sp-3);margin-top:var(--sp-3)}
+.journey-summary-title b{font-size:var(--fs-sm)}
+.journey-summary-title span,.journey-summary-main small{font-size:var(--fs-xs)}
+.english-series-name{font-size:var(--fs-lg)}
+.english-today-row{padding:var(--sp-3);margin-top:var(--sp-3)}
+.english-today-row b{font-size:var(--fs-sm)}
+.english-today-row small{font-size:var(--fs-xs)}
+.challenge-grid{gap:var(--sp-3)}
+.challenge-card{min-height:128px;border-radius:var(--radius-md);padding:var(--sp-3)}
+.challenge-card b{font-size:var(--fs-md)}
+.challenge-card small{font-size:var(--fs-xs)}
+.poem-entry{padding:var(--sp-3);margin-top:var(--sp-3)}
+.poem-entry b{font-size:var(--fs-sm)}
+.poem-entry small{font-size:var(--fs-xs)}
+.record{padding:var(--sp-3);min-height:58px}
+.record-main b{font-size:var(--fs-sm)}
+.record-main small{font-size:var(--fs-xs)}
+.chip{font-size:var(--fs-xs);padding:7px 11px}
+.reward{padding:var(--sp-3);border-radius:var(--radius-md)}
+.reward b{font-size:var(--fs-sm)}
+.reward p{font-size:var(--fs-xs);height:auto;min-height:32px}
+.apply{height:38px;border-radius:var(--radius-sm);font-size:var(--fs-xs)}
+.subbar{min-height:60px;padding:var(--sp-2) var(--sp-4)}
+.subbar h2{font-size:var(--fs-lg)}
+.back,.x{width:40px;height:40px;min-width:40px;border-radius:var(--radius-sm)}
+.subcontent{padding:var(--sp-3) var(--sp-4) var(--sp-6)}
+.question-card{padding:var(--sp-5) var(--sp-4)}
+.question-type{font-size:var(--fs-xs)}
+.question{font-size:30px}.question.sub{font-size:var(--fs-xl)}
+.choice,.key{min-height:48px;border-radius:var(--radius-sm);font-size:var(--fs-md)}
+.dont-know-btn{min-height:40px;font-size:var(--fs-sm)}
+.teach-card{padding:var(--sp-5) var(--sp-4);border-radius:var(--radius-lg)}
+.teach-note{font-size:var(--fs-xs)}
+.poem-row{min-height:60px;border-radius:var(--radius-md)}
+.poem-main b{font-size:var(--fs-sm)}
+.poem-main em,.poem-status{font-size:var(--fs-xs)}
+.status-opt{height:44px;border-radius:var(--radius-sm);font-size:var(--fs-xs)}
+.sheet{padding:var(--sp-4) var(--sp-4) calc(var(--sp-4) + env(safe-area-inset-bottom))}
+.sheet-item{min-height:56px;border-radius:var(--radius-md)}
+.sheet-item b{font-size:var(--fs-sm)}
+.sheet-item small{font-size:var(--fs-xs)}
+.bottomnav .nav{font-size:var(--fs-xs)}
+.bottomnav .nav i{font-size:21px}
+@media(min-width:700px){
+  body{padding:24px}.app{height:min(900px,calc(100dvh - 48px));border-radius:28px;box-shadow:0 24px 70px rgba(52,40,16,.16)}.mask{align-items:center}.sheet{border-radius:22px;max-width:390px}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="topbar">
+    <button class="profile" id="profileBtn">
+      <div class="avatar">🐤</div>
+      <div class="name">宛摆鸭的成长天地 <span class="chev">⌄</span></div>
+    </button>
+    <button class="energy-btn" id="energyBtn">✨ 可用 <b id="energyTop">460</b></button>
+  </header>
+
+  <div class="main">
+
+    <!-- 今日任务 -->
+    <main class="page active" data-page="tasks">
+      <section class="today-stage">
+        <div class="stage-top">
+          <div>
+            <div class="eyebrow">🚂 今天继续往前走</div>
+            <div class="stage-title" id="stageTitle">还有 3 站</div>
+            <div class="stage-meta">
+              <span id="doneMeta">已完成 2 / 5</span><span>本周前进 4 天</span><span id="todayGain">+2 ⚡</span>
+            </div>
+          </div>
+          <div class="stage-pet" id="stagePet">🐤</div>
+        </div>
+        <div class="route"><span>🚂</span><div class="route-line"><i id="routeLine"></i></div><span>🏁</span></div>
+        <div class="stage-msg" id="stageMsg">“前两站已经完成啦，下一站也不用急。”</div>
+      </section>
+
+      <div class="section-head"><h2>今日任务</h2><button class="link" id="sortBtn">调整顺序</button></div>
+      <div class="sort-hint" id="sortHint">长按拖动没有固定时间的任务；固定时间任务保持原位。</div>
+
+      <div class="task-list" id="taskList">
+        <div class="task fixed done" data-name="出发去学校" data-emoji="🌞" data-energy="1" data-fixed="1">
+          <div class="check">✓</div><div class="task-icon">🌞</div><div class="task-main"><div class="task-name">出发去学校</div><div class="task-meta">08:00–08:05 · 固定</div></div><span class="pill">+1</span>
+        </div>
+        <div class="task done" data-name="趣味闯关" data-emoji="🌟" data-energy="1">
+          <div class="handle">☰</div><div class="check">✓</div><div class="task-icon">🌟</div><div class="task-main"><div class="task-name">趣味闯关</div><div class="task-meta">预计15分钟</div></div><span class="pill">+1</span>
+        </div>
+        <div class="task" data-name="钢琴练习" data-emoji="🎵" data-energy="5">
+          <div class="handle">☰</div><div class="check"></div><div class="task-icon">🎵</div><div class="task-main"><div class="task-name">钢琴练习</div><div class="task-meta">预计15分钟</div></div><button class="start-btn">▶</button>
+        </div>
+        <div class="task" data-name="阅读" data-emoji="📖" data-energy="2">
+          <div class="handle">☰</div><div class="check"></div><div class="task-icon">📖</div><div class="task-main"><div class="task-name">阅读</div><div class="task-meta">预计20分钟</div></div><button class="start-btn">▶</button>
+        </div>
+        <div class="task" data-name="收书包" data-emoji="🎒" data-energy="1">
+          <div class="handle">☰</div><div class="check"></div><div class="task-icon">🎒</div><div class="task-main"><div class="task-name">收书包</div><div class="task-meta">预计5分钟</div></div><button class="start-btn">▶</button>
+        </div>
+      </div>
+      <button class="primary start-all" id="startNextBtn">▶ 开始下一项</button>
+    </main>
+
+    <!-- 阅读 -->
+    <main class="page" data-page="reading">
+      <div class="reading-switch" role="tablist">
+        <button class="reading-switch-btn active" data-reading-mode="cn">中文阅读</button>
+        <button class="reading-switch-btn" data-reading-mode="en">英语阅读</button>
+      </div>
+
+      <!-- 中文阅读 -->
+      <section class="reading-mode active" data-reading-panel="cn">
+        <section class="read-main">
+          <div class="read-head">
+            <div><div class="eyebrow">📖 现在一起读</div><div class="book-name" id="currentBookName">《没头脑和不高兴》</div></div>
+            <button class="link" id="shelfBtn">我的书架 ›</button>
+          </div>
+          <div class="read-row">
+            <div class="cover" id="currentCover">没头脑和<br>不高兴</div>
+            <div class="read-info">
+              <div class="small" id="bookProgress">📍 从开头开始</div>
+              <div class="small" style="margin-top:8px">今天 <b id="readMinutes">0 / 20</b> 分钟</div>
+              <div class="read-progress"><i id="readProgressBar"></i></div>
+              <button class="primary" id="startReadingBtn">▶ 开始阅读</button>
+            </div>
+          </div>
+          <div class="pet-line"><div class="mini-pet">🐤</div><span>“我在这儿陪你读。”</span></div>
+        </section>
+
+        <div class="section-head"><h2>最近阅读</h2></div>
+        <div class="recent-books" id="recentBooks">
+          <div class="recent-book active" data-book="《没头脑和不高兴》" data-cover="没头脑和|不高兴" data-progress="📍 从开头开始">
+            <div class="recent-cover" style="background:linear-gradient(145deg,#5F9FB8,#75C2D5)">没头脑和不高兴</div>
+            <div class="recent-title">没头脑和不高兴</div>
+            <button class="recent-action current" disabled>当前在读</button>
+          </div>
+          <div class="recent-book" data-book="《神奇校车》" data-cover="🚌" data-progress="📍 上次读到第18页">
+            <div class="recent-cover bus">🚌</div>
+            <div class="recent-title">神奇校车</div>
+            <button class="recent-action">设为在读</button>
+          </div>
+          <div class="recent-book" data-book="《小猪唏哩呼噜》" data-cover="🐷🐷" data-progress="📍 上次读到第32页">
+            <div class="recent-cover pig">🐷🐷</div>
+            <div class="recent-title">小猪唏哩呼噜</div>
+            <button class="recent-action">设为在读</button>
+          </div>
+        </div>
+
+        <button class="journey-summary-card" id="readingJourneyBtn">
+          <div class="journey-summary-icon">🏔️</div>
+          <div class="journey-summary-main">
+            <div class="journey-summary-title"><b>我的阅读旅程</b><span>10 / 24 本</span></div>
+            <div class="mini-track"><i style="width:42%"></i></div>
+            <small>再读 2 本，到达「半山营地」</small>
+          </div>
+          <span class="journey-summary-arrow">›</span>
+        </button>
+      </section>
+
+      <!-- 英语阅读 -->
+      <section class="reading-mode" data-reading-panel="en">
+        <section class="english-current-card">
+          <div class="english-current-head">
+            <div>
+              <div class="eyebrow">⭐ 今天的英语阅读</div>
+              <div class="english-series-name">牛津阅读树 · First Words</div>
+            </div>
+            <button class="series-switch" id="seriesSwitchBtn">换系列⌄</button>
+          </div>
+
+          <div class="english-today-row">
+            <div>
+              <b>今天已读 2 本</b>
+              <small>英语绘本节奏快，读完一本就点亮一颗星</small>
+            </div>
+            <div class="english-today-stars">⭐⭐</div>
+          </div>
+
+          <div class="english-next-book">
+            <div class="english-next-cover">5C</div>
+            <div>
+              <b>The Princess in the Tower</b>
+              <small>下一本 · 点开就开始</small>
+            </div>
+            <button class="english-start-btn" id="startEnglishBook">开始 ›</button>
+          </div>
+        </section>
+
+        <div class="section-head"><h2>最近读过</h2><button class="link" id="englishLibraryBtn">全部绘本 ›</button></div>
+        <div class="english-recent-grid">
+          <button class="english-recent-book"><div class="english-recent-cover">2A</div><b>Poor Old Rabbit</b><small>已读完</small></button>
+          <button class="english-recent-book"><div class="english-recent-cover alt">5B</div><b>The Ogre's Dinner</b><small>已读完</small></button>
+          <button class="english-recent-book"><div class="english-recent-cover soft">5A</div><b>A Knight in Town</b><small>最近读过</small></button>
+        </div>
+
+        <button class="journey-summary-card english-summary" id="englishJourneyBtn">
+          <div class="journey-summary-icon">⭐</div>
+          <div class="journey-summary-main">
+            <div class="journey-summary-title"><b>英语小星路</b><span>6 / 20 本</span></div>
+            <div class="mini-stars">⭐⭐⭐⭐⭐⭐☆☆☆☆</div>
+            <small>再读 4 本，点亮下一颗大星</small>
+          </div>
+          <span class="journey-summary-arrow">›</span>
+        </button>
+      </section>
+    </main>
+
+    <!-- 趣味闯关 -->
+    <main class="page" data-page="challenge">
+      <div class="challenge-grid">
+        <button class="challenge-card c1" data-challenge="chinese"><div class="ci">🀄</div><b>语文闯关</b><small>识字 · 基础快答</small></button>
+        <button class="challenge-card c2" data-challenge="english"><div class="ci">🔤</div><b>英语闯关</b><small>单词听力</small></button>
+        <button class="challenge-card c3" data-challenge="math"><div class="ci">🔢</div><b>数学闯关</b><small>口算专项</small></button>
+        <button class="challenge-card c4" data-challenge="poem"><div class="ci">📜</div><b>古诗词挑战</b><small>背一背 · 练一练</small></button>
+      </div>
+
+      <button class="poem-entry" id="poemMapBtn"><span>📜</span><div><b>古诗地图</b><small>已点亮17首 · 当前第18首</small></div><span>›</span></button>
+
+      <div class="section-head"><h2>最近挑战</h2><button class="link" id="allChallengeRecords">全部记录 ›</button></div>
+      <div class="challenge-record-list">
+        <button class="record full-record" data-record="英语 · 10题">
+          <span>🇬🇧</span>
+          <div class="record-main"><b>英语 · 10题</b><small>00:40 · 正确率100%</small></div>
+          <div class="record-right"><span class="pill">+1</span><span class="row-arrow">›</span></div>
+        </button>
+        <button class="record full-record" data-record="古诗词 · 5题">
+          <span>📜</span>
+          <div class="record-main"><b>古诗词 · 5题</b><small>00:46 · 正确率100%</small></div>
+          <div class="record-right"><span class="pill">+1</span><span class="row-arrow">›</span></div>
+        </button>
+      </div>
+    </main>
+
+    <!-- 能量小铺 -->
+    <main class="page" data-page="shop">
+      <div class="chips">
+        <button class="chip active">推荐</button><button class="chip">运动</button><button class="chip">学习</button><button class="chip">生活</button>
+      </div>
+      <div class="reward-grid">
+        <div class="reward" data-cost="10" data-reward="动画片10分钟"><div class="ri">📺</div><b>动画片10分钟</b><p>猫和老鼠 / 海绵宝宝</p><button class="apply">10⚡ · 兑换</button></div>
+        <div class="reward" data-cost="15" data-reward="户外运动15分钟"><div class="ri">🚲</div><b>户外运动15分钟</b><p>跳绳 / 骑车 / 打球任选</p><button class="apply">15⚡ · 兑换</button></div>
+        <div class="reward" data-cost="15" data-reward="点一首歌"><div class="ri">🎵</div><b>点一首歌</b><p>今天由你来选音乐</p><button class="apply">15⚡ · 兑换</button></div>
+        <div class="reward" data-cost="15" data-reward="多讲一个故事"><div class="ri">📖</div><b>多讲一个故事</b><p>选一本绘本由爸妈讲</p><button class="apply">15⚡ · 兑换</button></div>
+        <div class="reward" data-cost="35" data-reward="惊喜盲盒"><div class="ri">🎁</div><b>惊喜盲盒</b><p>拆开一个神秘体验</p><button class="apply">35⚡ · 兑换</button></div>
+        <div class="reward" data-cost="20" data-reward="自选水果拼盘"><div class="ri">🍉</div><b>自选水果拼盘</b><p>今天由你来搭配</p><button class="apply">20⚡ · 兑换</button></div>
+      </div>
+    </main>
+
+    <!-- 二级：任务执行 -->
+    <section class="overlay-page" id="taskRunner">
+      <div class="subbar"><button class="back" data-close="taskRunner">‹</button><div><h2>正在进行</h2><div class="small">只看眼前这一件</div></div><button class="right" id="pauseTaskBtn">暂停</button></div>
+      <div class="subcontent">
+        <div class="runner-hero"><div class="train">🚂</div></div>
+        <div class="card runner-card">
+          <div class="emoji" id="runnerEmoji">🎵</div><h3 id="runnerName">钢琴练习</h3><div class="small" id="runnerMeta">预计15分钟</div>
+          <div class="timer-ring"><div class="timer-inner"><div><div class="small">已用时</div><div class="timer" id="taskTimer">00:00</div></div></div></div>
+          <div class="runner-msg" id="runnerMsg">🐤 “先开始就很好，我陪你。”</div>
+        </div>
+        <div class="dual"><button class="secondary" id="laterTaskBtn">稍后再做</button><button class="primary" id="completeTaskBtn">✓ 完成任务</button></div>
+      </div>
+    </section>
+
+    <!-- 二级：阅读计时 -->
+    <section class="overlay-page" id="readingSession">
+      <div class="subbar"><button class="back" data-close="readingSession">‹</button><div><h2>阅读时间</h2><div class="small">安静读一会儿</div></div><button class="right" id="pauseReadingBtn">暂停</button></div>
+      <div class="subcontent reading-session">
+        <div class="big-cover" id="sessionCover">没头脑和<br>不高兴</div><h3 id="sessionBook">《没头脑和不高兴》</h3>
+        <div class="read-time" id="readingTimer">00:00</div><div class="soft-note">不用盯着时间，读进去就好。</div>
+        <div class="pet-line" style="justify-content:center;border:0"><div class="mini-pet">🐤</div><span>“我在这儿陪你。”</span></div>
+        <div class="reading-session-actions"><button class="secondary" id="finishReadingLater">先读到这里</button><button class="primary" id="finishReadingBtn">✓ 完成阅读</button></div>
+      </div>
+    </section>
+
+    <!-- 二级：我的书架 -->
+    <section class="overlay-page" id="bookshelfPage">
+      <div class="subbar"><button class="back" data-close="bookshelfPage">‹</button><div><h2>我的书架</h2><div class="small">选一本作为当前在读</div></div><span></span></div>
+      <div class="subcontent">
+        <div class="card shelf-current"><div class="mini-cover2">没头脑和<br>不高兴</div><div><div class="eyebrow">当前在读</div><b id="shelfCurrentName">《没头脑和不高兴》</b><div class="small">开始阅读后会回到这本书</div></div></div>
+        <div class="shelf-list" id="shelfList">
+          <div class="shelf-row" data-book="《没头脑和不高兴》" data-cover="没头脑和|不高兴" data-progress="📍 从开头开始"><div class="shelf-cover">没头脑和不高兴</div><div><b>没头脑和不高兴</b><small>当前在读</small></div><button class="set-current active">当前</button></div>
+          <div class="shelf-row" data-book="《神奇校车》" data-cover="🚌" data-progress="📍 上次读到第18页"><div class="shelf-cover">🚌</div><div><b>神奇校车</b><small>最近读过</small></div><button class="set-current">设为在读</button></div>
+          <div class="shelf-row" data-book="《小猪唏哩呼噜》" data-cover="🐷🐷" data-progress="📍 上次读到第32页"><div class="shelf-cover">🐷</div><div><b>小猪唏哩呼噜</b><small>最近读过</small></div><button class="set-current">设为在读</button></div>
+          <div class="shelf-row" data-book="《孤独的小螃蟹》" data-cover="🦀" data-progress="📍 已读完"><div class="shelf-cover">🦀</div><div><b>孤独的小螃蟹</b><small>已读完</small></div><button class="set-current">重新读</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 二级：阅读旅程 -->
+    <section class="overlay-page" id="readingJourneyPage">
+      <div class="subbar"><button class="back" data-close="readingJourneyPage">‹</button><div><h2>我的阅读旅程</h2><div class="small">看看已经走了多远</div></div><span></span></div>
+      <div class="subcontent">
+        <div class="journey-hero"><div class="eyebrow">🏔️ 今年的阅读旅程</div><h3>10 / 24 本</h3><div class="small">再读完2本，就到达半山营地。</div><div class="journey-progress"><i></i></div></div>
+        <div class="milestones">
+          <div class="milestone"><div class="icon">🌱</div><div><b>山脚出发</b><small>完成4本</small></div><div class="status">已到达</div></div>
+          <div class="milestone"><div class="icon">🌲</div><div><b>小树林</b><small>完成8本</small></div><div class="status">已到达</div></div>
+          <div class="milestone"><div class="icon">⛺</div><div><b>半山营地</b><small>完成12本</small></div><div class="status">还差2本</div></div>
+          <div class="milestone"><div class="icon">☁️</div><div><b>云端</b><small>完成18本</small></div><div class="small">继续前进</div></div>
+          <div class="milestone"><div class="icon">🏔️</div><div><b>山顶</b><small>完成24本</small></div><div class="small">终点</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 二级：英语小星路 -->
+    <section class="overlay-page" id="englishJourneyPage">
+      <div class="subbar"><button class="back" data-close="englishJourneyPage">‹</button><div><h2>英语小星路</h2><div class="small">每读一本，就点亮一颗星</div></div><span></span></div>
+      <div class="subcontent">
+        <div class="journey-hero star-hero"><div class="eyebrow">⭐ 本月小星路</div><h3>已经点亮6颗星</h3><div class="stars">⭐⭐⭐⭐⭐⭐☆☆☆☆</div></div>
+        <div class="english-books">
+          <div class="english-book"><b>Poor Old Rabbit</b><small>已读完 · ⭐</small></div>
+          <div class="english-book"><b>The Toy's Party</b><small>已读完 · ⭐</small></div>
+          <div class="english-book"><b>At the Park</b><small>已读完 · ⭐</small></div>
+          <div class="english-book"><b>Go Away, Floppy</b><small>已读完 · ⭐</small></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 二级：英语绘本库（孩子端轻量版） -->
+    <section class="overlay-page" id="englishLibraryPage">
+      <div class="subbar"><button class="back" data-close="englishLibraryPage">‹</button><div><h2>英语绘本</h2><div class="small">按系列继续往下读</div></div><span></span></div>
+      <div class="subcontent">
+        <div class="series-card active-series">
+          <div>
+            <div class="eyebrow">当前系列</div>
+            <b>牛津阅读树 · First Words</b>
+            <small>已读 6 / 20 本</small>
+          </div>
+          <span>✓</span>
+        </div>
+        <div class="series-card">
+          <div>
+            <div class="eyebrow">可切换</div>
+            <b>牛津阅读树 · Stage 2</b>
+            <small>已读 2 / 18 本</small>
+          </div>
+          <span>›</span>
+        </div>
+        <div class="series-book-list">
+          <button class="series-book-row"><span class="series-book-cover">5C</span><div><b>The Princess in the Tower</b><small>下一本</small></div><span>开始 ›</span></button>
+          <button class="series-book-row"><span class="series-book-cover">5B</span><div><b>The Ogre's Dinner</b><small>已读完</small></div><span>✓</span></button>
+          <button class="series-book-row"><span class="series-book-cover">5A</span><div><b>A Knight in Town</b><small>已读完</small></div><span>✓</span></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 二级：手机闯关 -->
+    <section class="overlay-page" id="challengePage">
+      <div class="subbar"><button class="back" data-close="challengePage">‹</button><div><h2 id="challengeTitle">数学口算</h2><div class="small" id="challengeCount">第 1 / 3 题</div></div><button class="right" id="exitChallengeBtn">退出</button></div>
+      <div class="subcontent challenge-shell">
+        <div class="challenge-progress"><i id="challengeProgressBar"></i></div>
+        <div class="card question-card" id="questionCard"></div>
+
+        <button class="dont-know-btn" id="dontKnowBtn">不会 / 没学过</button>
+
+        <div class="challenge-feedback-lite" id="challengeFeedback"></div>
+        <div class="challenge-next">
+          <button class="primary" id="nextQuestionBtn" style="display:none">下一题</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 二级：教学卡 / 再试一次 -->
+    <section class="overlay-page" id="teachCardPage">
+      <div class="subbar">
+        <button class="back" id="teachBackBtn">‹</button>
+        <div><h2>认识一下</h2><div class="small">先看懂，再试一次</div></div>
+        <span></span>
+      </div>
+      <div class="subcontent">
+        <div class="teach-card" id="teachCardContent"></div>
+        <div class="teach-note">首次作答结果已经记录；这里学会了，也不会改成“首次答对”。</div>
+        <button class="primary teach-retry-btn" id="retryQuestionBtn">马上试一次 →</button>
+      </div>
+    </section>
+
+    <!-- 二级：闯关结果 -->
+    <section class="overlay-page" id="challengeResultPage">
+      <div class="subbar"><button class="back" id="resultBack">‹</button><div><h2>本次闯关</h2><div class="small">已经完成</div></div><span></span></div>
+      <div class="subcontent result">
+        <div class="big">🎉</div><h3>这一轮完成啦</h3><div class="result-score">3 / 3</div><div class="small">🐤 “你一题一题认真做完了。”</div>
+        <div class="result-grid"><div><span>用时</span><b>00:42</b></div><div><span>获得</span><b>+1 ⚡</b></div></div>
+        <button class="primary" id="resultDoneBtn" style="width:100%;margin-top:15px">回到趣味闯关</button>
+      </div>
+    </section>
+
+    <!-- 二级：挑战记录 -->
+    <section class="overlay-page" id="challengeRecordPage">
+      <div class="subbar"><button class="back" data-close="challengeRecordPage">‹</button><div><h2>最近挑战</h2><div class="small">只看最近的练习结果</div></div><span></span></div>
+      <div class="subcontent">
+        <div class="record"><span>🇬🇧</span><div class="record-main"><b>英语 · 10题</b><small>今天 · 00:40 · 100%</small></div><span class="pill">+1</span></div>
+        <div class="record"><span>📜</span><div class="record-main"><b>古诗词 · 5题</b><small>昨天 · 00:46 · 100%</small></div><span class="pill">+1</span></div>
+        <div class="record"><span>🔢</span><div class="record-main"><b>数学 · 10题</b><small>昨天 · 00:42 · 90%</small></div><span class="pill">+1</span></div>
+      </div>
+    </section>
+
+    <!-- 二级：古诗地图 -->
+    <section class="overlay-page" id="poemMapPage">
+      <div class="subbar"><button class="back" data-close="poemMapPage">‹</button><div><h2>古诗地图</h2><div class="small">往上看走过的，往下看接下来</div></div><div class="right" id="poemTopCount">18 / 75</div></div>
+      <div class="subcontent">
+        <div class="poem-stage-switch">
+          <div class="poem-stage"><b>第一程 · 75首</b><small id="stage1Text">已点亮17首 · 当前第18首</small></div>
+          <div class="poem-stage locked"><b>第二程 · 80首</b><small>第一程完成后继续</small></div>
+        </div>
+        <div class="poem-progress"><i id="poemProgressBar"></i></div>
+        <div class="poem-list" id="poemList"></div>
+      </div>
+    </section>
+
+    <!-- 二级：古诗详情 -->
+    <section class="overlay-page" id="poemDetailPage">
+      <div class="subbar"><button class="back" data-close="poemDetailPage">‹</button><div><h2>读一读</h2><div class="small">顺手多看几眼，也是在复习</div></div><span></span></div>
+      <div class="subcontent poem-detail">
+        <h3 id="poemTitle">静夜思</h3><div class="small" id="poemAuthor">李白</div>
+        <div class="poem-lines" id="poemLines"></div>
+        <div class="status-label">学习状态</div>
+        <div class="status-options" id="poemStatusOptions">
+          <button class="status-opt" data-status="todo">○ 未开始</button>
+          <button class="status-opt" data-status="learning">● 学习中</button>
+          <button class="status-opt" data-status="done">✓ 已掌握</button>
+        </div>
+        <div class="runner-msg" style="margin-top:10px">🐤 “不用急着背，先多看几眼也很好。”</div>
+      </div>
+    </section>
+
+    <!-- 二级：添加到手机桌面 -->
+    <section class="overlay-page" id="addHomePage">
+      <div class="subbar"><button class="back" data-close="addHomePage">‹</button><div><h2>添加到手机桌面</h2><div class="small">以后一点就打开</div></div><span></span></div>
+      <div class="subcontent">
+        <div class="guide-box"><b>当前孩子：宛摆鸭</b><br>添加后，这个桌面快捷方式会打开当前浏览器里登录的孩子账号。</div>
+        <div class="guide-steps">
+          <div class="guide-step"><div class="num">1</div><div><b>用当前浏览器登录孩子的授权码</b><small>同一个浏览器只绑定一个孩子。</small></div></div>
+          <div class="guide-step"><div class="num">2</div><div><b>选择浏览器的“添加到主屏幕/桌面”</b><small>不同手机浏览器名称可能略有不同。</small></div></div>
+          <div class="guide-step"><div class="num">3</div><div><b>家里有多个孩子时</b><small>请分别使用不同浏览器登录各自授权码，再分别添加到桌面。不要在同一浏览器里反复切换授权码。</small></div></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <nav class="bottomnav">
+    <button class="nav active" data-go="tasks"><i>🚂</i><span>今日任务</span></button>
+    <button class="nav" data-go="reading"><i>📖</i><span>阅读</span></button>
+    <button class="nav" data-go="challenge"><i>🎮</i><span>趣味闯关</span></button>
+    <button class="nav" data-go="shop"><i>🎁</i><span>能量小铺</span></button>
+  </nav>
+</div>
+
+<!-- 账号/低频菜单 -->
+<div class="mask" id="profileMask">
+  <div class="sheet">
+    <div class="sheet-head"><div><div class="eyebrow">🐤 当前账号</div><h3>宛摆鸭的成长天地</h3></div><button class="x" data-mask-close="profileMask">×</button></div>
+    <button class="sheet-item" id="addHomeBtn"><span>📱</span><div><b>添加到手机桌面</b><small>创建当前孩子的桌面快捷方式</small></div></button>
+    <button class="sheet-item" id="parentBtn"><span>⚙️</span><div><b>家长管理</b><small>任务安排、数据和系统设置</small></div></button>
+    <button class="sheet-item"><span>❔</span><div><b>使用帮助</b><small>查看操作说明</small></div></button>
+    <button class="sheet-item" id="logoutBtn"><span>↪️</span><div><b>退出当前账号</b><small>退出后需要重新输入授权码</small></div></button>
+  </div>
+</div>
+
+<!-- 能量账户 -->
+<div class="mask" id="energyMask">
+  <div class="sheet">
+    <div class="sheet-head"><div><div class="eyebrow">✨ 我的能量</div><h3>能量账户</h3></div><button class="x" data-mask-close="energyMask">×</button></div>
+    <div class="energy-box"><span>可用能量</span><strong id="energyAvailable">460</strong><div class="energy-mini"><div>累计获得<b>1280</b></div><div>今天获得<b id="energyToday">+12</b></div></div></div>
+    <div class="section-head"><h2>最近明细</h2><span class="small">获得和兑换都在这里</span></div>
+    <div class="ledger" id="ledger">
+      <div class="ledger-row"><div class="ico">🎵</div><div><b>完成钢琴练习</b><small>今天 18:22</small></div><div class="amt gain">+5</div></div>
+      <div class="ledger-row"><div class="ico">📖</div><div><b>阅读20分钟</b><small>今天 17:40</small></div><div class="amt gain">+2</div></div>
+      <div class="ledger-row"><div class="ico">📺</div><div><b>兑换动画片10分钟</b><small>昨天 20:10</small></div><div class="amt spend">-10</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 兑换确认 -->
+<div class="mask" id="redeemMask">
+  <div class="sheet redeem-sheet">
+    <div class="ri" id="redeemEmoji">🎁</div><h3 id="redeemTitle">兑换奖励</h3><div class="small" id="redeemText">使用10能量兑换？</div>
+    <div class="remain">兑换后剩余 <b id="redeemRemain">450</b> ⚡</div>
+    <button class="primary" id="confirmRedeem">确认兑换</button>
+    <button class="secondary" style="width:100%;margin-top:8px" data-mask-close="redeemMask">暂不兑换</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $=(s,p=document)=>p.querySelector(s), $$=(s,p=document)=>[...p.querySelectorAll(s)];
+let energy=460;
+let currentTask=null, taskSec=0, taskTimerId=null, taskPaused=false;
+let readSec=0, readTimerId=null, readPaused=false;
+let currentBook={name:"《没头脑和不高兴》",cover:"没头脑和|不高兴",progress:"📍 从开头开始"};
+let pendingReward=null, activePoem=null;
+let challengeType="math", qIndex=0, challengeScore=0, challengeAnswered=false;
+let recentSpeech=[];
+
+const speech={
+  open:["新的一天开始啦，今天我们慢慢来。","今天也一起稳稳往前走。","我来啦，今天还是一站一站走。"],
+  start:["先开始就很好，我陪你。","不用想后面的，先做好眼前这一件。","这一站开始啦，慢慢做就好。"],
+  done:["刚才这件事，你真的做完了。","又往前走了一站，我看见啦。","完成一件，就是向前走了一步。"],
+  half:["已经过半啦，剩下的慢慢来。","不知不觉走了一半。"],
+  finish:["今天这些事，你一件一件都接住了。收工啦。","今天的小旅程到站啦。"],
+  reading:["翻开书吧，今天看看故事会走到哪里。","安静读一会儿，我在旁边陪你。"],
+  correct:["答对啦，这一题很稳。","这一题你看得很准。","拿下这一题。"],
+  wrong:["没关系，看清楚答案再往下走。","这一题先记住，我们继续。"]
+};
+function pick(arr){let p=arr.filter(x=>!recentSpeech.includes(x)); if(!p.length)p=arr; const v=p[Math.floor(Math.random()*p.length)]; recentSpeech.push(v); if(recentSpeech.length>8)recentSpeech.shift(); return v}
+function speak(text){try{if(!("speechSynthesis" in window))return; speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text);u.lang="zh-CN";u.rate=.95;u.pitch=1.05;speechSynthesis.speak(u)}catch(e){}}
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500)}
+function openOverlay(id){$("#"+id).classList.add("active")}
+function closeOverlay(id){$("#"+id).classList.remove("active")}
+$$("[data-close]").forEach(b=>b.onclick=()=>closeOverlay(b.dataset.close));
+$$("[data-mask-close]").forEach(b=>b.onclick=()=>$("#"+b.dataset.maskClose).classList.remove("active"));
+$$(".mask").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)m.classList.remove("active")}));
+
+// tabs
+$$(".nav").forEach(n=>n.onclick=()=>{ $$(".nav").forEach(x=>x.classList.toggle("active",x===n)); $$(".page").forEach(p=>p.classList.toggle("active",p.dataset.page===n.dataset.go)); });
+
+// profile + energy
+$("#profileBtn").onclick=()=>$("#profileMask").classList.add("active");
+$("#energyBtn").onclick=()=>{refreshEnergy();$("#energyMask").classList.add("active")};
+$("#addHomeBtn").onclick=()=>{$("#profileMask").classList.remove("active");openOverlay("addHomePage")};
+$("#parentBtn").onclick=()=>toast("家长管理沿用现有完整管理端");
+$("#logoutBtn").onclick=()=>toast("正式开发时：确认后清除本浏览器授权状态");
+
+// tasks
+function tasks(){return $$(".task")}
+function updateTasks(){
+  const all=tasks(), done=all.filter(t=>t.classList.contains("done")).length, total=all.length, left=total-done, pct=done/total*100;
+  $("#doneMeta").textContent=`已完成 ${done} / ${total}`; $("#routeLine").style.width=pct+"%";
+  const gain=all.filter(t=>t.classList.contains("done")).reduce((s,t)=>s+Number(t.dataset.energy||0),0); $("#todayGain").textContent=`+${gain} ⚡`;
+  if(done===0){$("#stageTitle").textContent=`今天有 ${total} 站`;$("#stageMsg").textContent="“不用急，我们先从第一站开始。”";$("#stagePet").textContent="🐤"}
+  else if(done<Math.ceil(total/2)){ $("#stageTitle").textContent=`还有 ${left} 站`;$("#stageMsg").textContent="“已经走起来了，下一站也不用急。”";$("#stagePet").textContent="🐤"}
+  else if(done<total){$("#stageTitle").textContent=`还有 ${left} 站`;$("#stageMsg").textContent="“不知不觉已经过半啦。”";$("#stagePet").textContent="🐤⭐"}
+  else{$("#stageTitle").textContent="今天顺利到站";$("#stageMsg").textContent="“今天这些事，你一件一件都接住了。”";$("#stagePet").textContent="🐤🎉"}
+}
+function nextTask(){return tasks().find(t=>!t.classList.contains("done"))}
+function openTask(task){
+  if(!task){toast("今天全部完成啦 🎉");return}
+  currentTask=task;$("#runnerName").textContent=task.dataset.name;$("#runnerEmoji").textContent=task.dataset.emoji;$("#runnerMeta").textContent=task.querySelector(".task-meta").textContent;
+  taskSec=0;taskPaused=false;$("#taskTimer").textContent="00:00";$("#pauseTaskBtn").textContent="暂停";const msg=pick(speech.start);$("#runnerMsg").textContent="🐤 “"+msg+"”";speak(msg);
+  clearInterval(taskTimerId);taskTimerId=setInterval(()=>{if(taskPaused)return;taskSec++;$("#taskTimer").textContent=fmt(taskSec)},1000);openOverlay("taskRunner");
+}
+$("#startNextBtn").onclick=()=>openTask(nextTask());
+$$(".start-btn").forEach(b=>b.onclick=e=>{e.stopPropagation();openTask(b.closest(".task"))});
+$("#pauseTaskBtn").onclick=()=>{taskPaused=!taskPaused;$("#pauseTaskBtn").textContent=taskPaused?"继续":"暂停"};
+$("#laterTaskBtn").onclick=()=>{clearInterval(taskTimerId);closeOverlay("taskRunner");toast("已放回任务列表，等会儿再做")};
+$("#completeTaskBtn").onclick=()=>{
+  clearInterval(taskTimerId); if(currentTask&&!currentTask.classList.contains("done")){currentTask.classList.add("done");currentTask.querySelector(".check").textContent="✓"; const g=Number(currentTask.dataset.energy||1);energy+=g;refreshEnergy()}
+  const d=tasks().filter(t=>t.classList.contains("done")).length,t=tasks().length; let msg=d===t?pick(speech.finish):(d===Math.ceil(t/2)?pick(speech.half):pick(speech.done));speak(msg);toast(`完成啦 · +${currentTask?.dataset.energy||1}⚡`);updateTasks();closeOverlay("taskRunner");
+};
+$("#sortBtn").onclick=()=>{$("#taskList").classList.toggle("sort-mode");$("#sortHint").classList.toggle("show");$("#sortBtn").textContent=$("#taskList").classList.contains("sort-mode")?"完成排序":"调整顺序"};
+
+
+// 阅读：中文/英语分开，记住上次停留模式
+function switchReadingMode(mode){
+  $$('.reading-switch-btn').forEach(b=>b.classList.toggle('active',b.dataset.readingMode===mode));
+  $$('.reading-mode').forEach(p=>p.classList.toggle('active',p.dataset.readingPanel===mode));
+  localStorage.setItem('readingMode',mode);
+}
+$$('.reading-switch-btn').forEach(b=>b.onclick=()=>switchReadingMode(b.dataset.readingMode));
+switchReadingMode(localStorage.getItem('readingMode')||'cn');
+
+$('#seriesSwitchBtn').onclick=$('#englishLibraryBtn').onclick=()=>openOverlay('englishLibraryPage');
+$('#startEnglishBook').onclick=()=>toast('正式开发时：进入英语绘本阅读页并记录“读完一本”');
+$$('.english-recent-book').forEach(b=>b.onclick=()=>toast('打开这本英语绘本'));
+$$('.series-book-row').forEach(b=>b.onclick=()=>toast('进入对应英语绘本'));
+
+// reading current book
+function setCurrentBook(data){
+  currentBook={name:data.book,cover:data.cover,progress:data.progress};
+  $("#currentBookName").textContent=currentBook.name;$("#bookProgress").textContent=currentBook.progress;$("#currentCover").innerHTML=currentBook.cover.split("|").join("<br>");
+  $("#sessionBook").textContent=currentBook.name;$("#sessionCover").innerHTML=currentBook.cover.split("|").join("<br>");
+  $("#shelfCurrentName").textContent=currentBook.name;
+  $$(".recent-book").forEach(x=>{
+    const a=x.dataset.book===currentBook.name;
+    x.classList.toggle("active",a);
+    const action=x.querySelector(".recent-action");
+    if(action){
+      action.textContent=a?"当前在读":"设为在读";
+      action.disabled=a;
+      action.classList.toggle("current",a);
+    }
+  });
+  $$(".shelf-row").forEach(x=>{const a=x.dataset.book===currentBook.name;x.querySelector(".set-current").classList.toggle("active",a);x.querySelector(".set-current").textContent=a?"当前":"设为在读"});
+}
+$$(".recent-action").forEach(btn=>btn.onclick=e=>{
+  e.stopPropagation();
+  const card=btn.closest(".recent-book");
+  if(card.classList.contains("active")) return;
+  setCurrentBook(card.dataset);
+  toast("已设为当前在读 📖");
+});
+$("#shelfBtn").onclick=()=>openOverlay("bookshelfPage");
+$$(".set-current").forEach(b=>b.onclick=()=>{setCurrentBook(b.closest(".shelf-row").dataset);toast("已设为当前在读")});
+$("#readingJourneyBtn").onclick=()=>openOverlay("readingJourneyPage"); $("#englishJourneyBtn").onclick=()=>openOverlay("englishJourneyPage");
+$("#startReadingBtn").onclick=()=>{readSec=0;readPaused=false;$("#readingTimer").textContent="00:00";$("#pauseReadingBtn").textContent="暂停";clearInterval(readTimerId);readTimerId=setInterval(()=>{if(!readPaused){readSec++;$("#readingTimer").textContent=fmt(readSec)}},1000);openOverlay("readingSession")};
+$("#pauseReadingBtn").onclick=()=>{readPaused=!readPaused;$("#pauseReadingBtn").textContent=readPaused?"继续":"暂停"};
+$("#finishReadingLater").onclick=()=>{clearInterval(readTimerId);closeOverlay("readingSession");toast("已记录本次阅读时长")};
+$("#finishReadingBtn").onclick=()=>{clearInterval(readTimerId);closeOverlay("readingSession");const mins=Math.max(1,Math.floor(readSec/60));$("#readMinutes").textContent=`${mins} / 20`;$("#readProgressBar").style.width=Math.min(100,mins/20*100)+"%";energy+=2;refreshEnergy();toast("阅读完成 · +2⚡")};
+
+// challenge content
+const challengeData={
+  chinese:{title:"语文闯关",questions:[
+    {kind:"choice",q:"“孩子”里有哪个字？",choices:["群","领","孩","座"],ans:2,
+     teach:{title:"孩",pinyin:"hái",examples:["孩子","孩童"]}},
+    {kind:"choice",q:"“春”字的正确读音是？",choices:["chūn","cūn","chún","chǔn"],ans:0,
+     teach:{title:"春",pinyin:"chūn",examples:["春天","春风"]}},
+    {kind:"choice",q:"下面哪个字读“míng”？",choices:["明","朋","月","日"],ans:0,
+     teach:{title:"明",pinyin:"míng",examples:["明天","明亮"]}}
+  ]},
+  english:{title:"英语单词听力",questions:[
+    {kind:"listen",q:"apple",choices:["苹果","香蕉","小狗","书包"],ans:0,teach:{title:"apple",pinyin:"苹果",examples:["apple · 苹果","an apple · 一个苹果"]}},
+    {kind:"listen",q:"book",choices:["铅笔","书","桌子","猫"],ans:1,teach:{title:"book",pinyin:"书",examples:["book · 书","a book · 一本书"]}},
+    {kind:"listen",q:"rabbit",choices:["兔子","小鸟","小鱼","老虎"],ans:0,teach:{title:"rabbit",pinyin:"兔子",examples:["rabbit · 兔子","a rabbit · 一只兔子"]}}
+  ]},
+  math:{title:"数学口算",questions:[
+    {kind:"keypad",q:"7 × 6",ans:"42",teach:{title:"7 × 6 = 42",pinyin:"",examples:["想一想：6个7是多少？","7×6 和 6×7 的答案一样"]}},
+    {kind:"keypad",q:"36 ÷ 6",ans:"6",teach:{title:"36 ÷ 6 = 6",pinyin:"",examples:["想一想：6×6=36","所以 36÷6=6"]}},
+    {kind:"keypad",q:"8 × 5",ans:"40",teach:{title:"8 × 5 = 40",pinyin:"",examples:["5个8是40","8×5=40"]}}
+  ]},
+  poem:{title:"古诗词挑战",questions:[
+    {kind:"choice",q:"“举头望明月”的下一句是？",choices:["低头思故乡","疑是地上霜","春眠不觉晓","更上一层楼"],ans:0,teach:{title:"静夜思",pinyin:"李白",examples:["举头望明月","低头思故乡"]}},
+    {kind:"choice",q:"《登鹳雀楼》的作者是？",choices:["李白","王之涣","杜甫","孟浩然"],ans:1,teach:{title:"登鹳雀楼",pinyin:"王之涣",examples:["白日依山尽","黄河入海流"]}},
+    {kind:"choice",q:"“春眠不觉晓”的下一句是？",choices:["处处闻啼鸟","黄河入海流","红掌拨清波","花落知多少"],ans:0,teach:{title:"春晓",pinyin:"孟浩然",examples:["春眠不觉晓","处处闻啼鸟"]}}
+  ]}
+};
+let firstAttemptRecorded=false, inRetry=false;
+
+function startChallenge(type){
+  challengeType=type;qIndex=0;challengeScore=0;challengeAnswered=false;firstAttemptRecorded=false;inRetry=false;
+  $('#challengeTitle').textContent=challengeData[type].title;
+  renderQuestion();
+  openOverlay('challengePage');
+}
+$$('[data-challenge]').forEach(b=>b.onclick=()=>startChallenge(b.dataset.challenge));
+
+function currentQuestion(){return challengeData[challengeType].questions[qIndex]}
+
+function renderQuestion(){
+  challengeAnswered=false;
+  $('#nextQuestionBtn').style.display='none';
+  $('#challengeFeedback').textContent='';
+  $('#dontKnowBtn').style.display='block';
+
+  const data=challengeData[challengeType],q=currentQuestion();
+  $('#challengeCount').textContent=`第 ${qIndex+1} / ${data.questions.length} 题`;
+  $('#challengeProgressBar').style.width=((qIndex+1)/data.questions.length*100)+'%';
+
+  const box=$('#questionCard');
+  if(q.kind==='choice'){
+    box.innerHTML=`<div class="question-type">${data.title}</div><div class="question sub">${q.q}</div><div class="choices">${q.choices.map((c,i)=>`<button class="choice" data-i="${i}">${c}</button>`).join('')}</div>`;
+    $$('.choice',box).forEach(c=>c.onclick=()=>answerChoice(c,Number(c.dataset.i),q.ans));
+  }else if(q.kind==='listen'){
+    box.innerHTML=`<div class="question-type">听一听，选出意思</div><button class="listen-btn" id="listenWord">🔊</button><div class="choices">${q.choices.map((c,i)=>`<button class="choice" data-i="${i}">${c}</button>`).join('')}</div>`;
+    $('#listenWord').onclick=()=>speak(q.q);
+    setTimeout(()=>speak(q.q),180); // 这里只播放题目本身，不播放鼓励语
+    $$('.choice',box).forEach(c=>c.onclick=()=>answerChoice(c,Number(c.dataset.i),q.ans));
+  }else{
+    box.innerHTML=`<div class="question-type">口算专项</div><div class="question">${q.q} = ?</div><div class="answer-box" id="mathAnswer">—</div><div class="keypad">${["1","2","3","4","5","6","7","8","9","⌫","0","确定"].map(k=>`<button class="key" data-k="${k}">${k}</button>`).join('')}</div>`;
+    let val='';
+    $$('.key',box).forEach(k=>k.onclick=()=>{
+      if(challengeAnswered)return;
+      const x=k.dataset.k;
+      if(x==='⌫')val=val.slice(0,-1);
+      else if(x==='确定'){answerMath(val,q.ans);return}
+      else if(val.length<3)val+=x;
+      $('#mathAnswer').textContent=val||'—';
+    });
+  }
+}
+
+function recordFirstAttempt(ok){
+  if(inRetry || firstAttemptRecorded) return;
+  firstAttemptRecorded=true;
+  // 正式开发：这里写入首次作答结果；后续重试不覆盖首次结果
+}
+
+function answerChoice(btn,i,ans){
+  if(challengeAnswered)return;
+  challengeAnswered=true;
+  const ok=i===ans;
+  recordFirstAttempt(ok);
+  btn.classList.add(ok?'correct':'wrong');
+  if(ok){
+    challengeScore++;
+    $('#challengeFeedback').textContent='✓ 答对啦';
+    $('#dontKnowBtn').style.display='none';
+    $('#nextQuestionBtn').style.display='block';
+  }else{
+    $$('.choice',$('#questionCard'))[ans]?.classList.add('correct');
+    $('#challengeFeedback').textContent='这题先认识一下，再回来试一次。';
+    setTimeout(()=>openTeachCard(currentQuestion()),350);
+  }
+}
+
+function answerMath(val,ans){
+  if(challengeAnswered)return;
+  challengeAnswered=true;
+  const ok=val===ans;
+  recordFirstAttempt(ok);
+  $('#mathAnswer').style.background=ok?'#E8F7EF':'#FFF0ED';
+  if(ok){
+    challengeScore++;
+    $('#challengeFeedback').textContent='✓ 答对啦';
+    $('#dontKnowBtn').style.display='none';
+    $('#nextQuestionBtn').style.display='block';
+  }else{
+    $('#challengeFeedback').textContent='这题先看一下方法，再回来试一次。';
+    setTimeout(()=>openTeachCard(currentQuestion()),350);
+  }
+}
+
+$('#dontKnowBtn').onclick=()=>{
+  if(challengeAnswered)return;
+  recordFirstAttempt(false);
+  challengeAnswered=true;
+  openTeachCard(currentQuestion());
+};
+
+function openTeachCard(q){
+  const t=q.teach||{title:'认识一下',pinyin:'',examples:[]};
+  $('#teachCardContent').innerHTML=`
+    <div class="teach-kicker">🌱 认识一下</div>
+    <div class="teach-main">${t.title}${t.pinyin?` <em>${t.pinyin}</em>`:''}</div>
+    <div class="teach-examples">${(t.examples||[]).map(x=>`<span>${x}</span>`).join('')}</div>`;
+  openOverlay('teachCardPage');
+}
+
+$('#teachBackBtn').onclick=()=>closeOverlay('teachCardPage');
+
+$('#retryQuestionBtn').onclick=()=>{
+  closeOverlay('teachCardPage');
+  inRetry=true;
+  challengeAnswered=false;
+  renderQuestion();
+  $('#challengeFeedback').textContent='再试一次，这次不计入首次作答。';
+};
+
+$('#nextQuestionBtn').onclick=()=>{
+  const data=challengeData[challengeType];
+  if(qIndex<data.questions.length-1){
+    qIndex++;
+    firstAttemptRecorded=false;
+    inRetry=false;
+    renderQuestion();
+  }else{
+    closeOverlay('challengePage');
+    openOverlay('challengeResultPage');
+    energy+=1;
+    refreshEnergy();
+  }
+};
+
+$('#exitChallengeBtn').onclick=()=>closeOverlay('challengePage');
+$('#resultBack').onclick=$('#resultDoneBtn').onclick=()=>closeOverlay('challengeResultPage');
+$('#allChallengeRecords').onclick=()=>openOverlay('challengeRecordPage');
+$$('[data-record]').forEach(r=>r.onclick=()=>openOverlay('challengeRecordPage'));
+
+// poem map
+const poemSamples=[
+["咏鹅","骆宾王","鹅，鹅，鹅|曲项向天歌|白毛浮绿水|红掌拨清波"],["悯农（其二）","李绅","锄禾日当午|汗滴禾下土|谁知盘中餐|粒粒皆辛苦"],
+["静夜思","李白","床前明月光|疑是地上霜|举头望明月|低头思故乡"],["春晓","孟浩然","春眠不觉晓|处处闻啼鸟|夜来风雨声|花落知多少"],
+["登鹳雀楼","王之涣","白日依山尽|黄河入海流|欲穷千里目|更上一层楼"],["风","李峤","解落三秋叶|能开二月花|过江千尺浪|入竹万竿斜"],
+["咏柳","贺知章","碧玉妆成一树高|万条垂下绿丝绦|不知细叶谁裁出|二月春风似剪刀"],["望庐山瀑布","李白","日照香炉生紫烟|遥看瀑布挂前川|飞流直下三千尺|疑是银河落九天"],
+["绝句","杜甫","两个黄鹂鸣翠柳|一行白鹭上青天|窗含西岭千秋雪|门泊东吴万里船"],["赠汪伦","李白","李白乘舟将欲行|忽闻岸上踏歌声|桃花潭水深千尺|不及汪伦送我情"],
+["寻隐者不遇","贾岛","松下问童子|言师采药去|只在此山中|云深不知处"],["小池","杨万里","泉眼无声惜细流|树阴照水爱晴柔|小荷才露尖尖角|早有蜻蜓立上头"],
+["池上","白居易","小娃撑小艇|偷采白莲回|不解藏踪迹|浮萍一道开"],["村居","高鼎","草长莺飞二月天|拂堤杨柳醉春烟|儿童散学归来早|忙趁东风放纸鸢"],
+["所见","袁枚","牧童骑黄牛|歌声振林樾|意欲捕鸣蝉|忽然闭口立"],["山行","杜牧","远上寒山石径斜|白云生处有人家|停车坐爱枫林晚|霜叶红于二月花"],
+["赠刘景文","苏轼","荷尽已无擎雨盖|菊残犹有傲霜枝|一年好景君须记|最是橙黄橘绿时"],["夜书所见","叶绍翁","萧萧梧叶送寒声|江上秋风动客情|知有儿童挑促织|夜深篱落一灯明"],
+["望天门山","李白","天门中断楚江开|碧水东流至此回|两岸青山相对出|孤帆一片日边来"],["饮湖上初晴后雨","苏轼","水光潋滟晴方好|山色空蒙雨亦奇|欲把西湖比西子|淡妆浓抹总相宜"]
+];
+const poems=Array.from({length:75},(_,i)=>{const s=poemSamples[i];return{id:i+1,title:s?s[0]:`第${i+1}首古诗`,author:s?s[1]:"系统已有作者",lines:s?s[2]:"此处读取系统现有古诗正文",status:i<17?"done":i===17?"learning":"todo"}});
+function currentPoem(){return poems.find(p=>p.status==="learning")||poems.find(p=>p.status==="todo")||poems[74]}
+function renderPoems(){
+  const cur=currentPoem(),done=poems.filter(p=>p.status==="done").length;$("#poemTopCount").textContent=`${cur.id} / 75`;$("#stage1Text").textContent=`已点亮${done}首 · 当前第${cur.id}首`;$("#poemProgressBar").style.width=(done/75*100)+"%";
+  $("#poemList").innerHTML=poems.map(p=>`<button class="poem-row ${p.status}" data-id="${p.id}"><span class="poem-index">${p.id}</span><span class="poem-main"><b>${p.title}</b><em>${p.author}</em></span><span class="poem-status">${p.status==="done"?"✓ 已掌握":p.status==="learning"?"● 学习中":"○ 未开始"}</span></button>`).join("");
+  $$(".poem-row").forEach(r=>r.onclick=()=>openPoem(Number(r.dataset.id)));
+}
+function locateCurrent(){setTimeout(()=>{const row=$(`.poem-row[data-id="${currentPoem().id}"]`);row?.scrollIntoView({block:"center"})},80)}
+$("#poemMapBtn").onclick=()=>{renderPoems();openOverlay("poemMapPage");locateCurrent()};
+function openPoem(id){activePoem=poems.find(p=>p.id===id);$("#poemTitle").textContent=activePoem.title;$("#poemAuthor").textContent=activePoem.author;$("#poemLines").innerHTML=activePoem.lines.split("|").map(x=>`<div>${x}</div>`).join("");$$(".status-opt").forEach(b=>b.classList.toggle("active",b.dataset.status===activePoem.status));openOverlay("poemDetailPage")}
+$$(".status-opt").forEach(b=>b.onclick=()=>{if(!activePoem)return;activePoem.status=b.dataset.status;$$(".status-opt").forEach(x=>x.classList.toggle("active",x===b));renderPoems();if(activePoem.status==="done"){toast("又点亮一首 ✨")}else toast("状态已更新")});
+
+// rewards + energy
+function refreshEnergy(){ $("#energyTop").textContent=energy;$("#energyAvailable").textContent=energy;$$(".reward").forEach(r=>{const c=Number(r.dataset.cost),b=r.querySelector(".apply"),low=energy<c;r.classList.toggle("insufficient",low);b.textContent=low?`还差 ${c-energy}⚡`:`${c}⚡ · 兑换`})}
+$$(".apply").forEach(b=>b.onclick=()=>{const r=b.closest(".reward"),cost=Number(r.dataset.cost);if(energy<cost){toast(`还差 ${cost-energy} 能量，再攒一点`);return}pendingReward={cost,name:r.dataset.reward,emoji:r.querySelector(".ri").textContent};$("#redeemEmoji").textContent=pendingReward.emoji;$("#redeemTitle").textContent=pendingReward.name;$("#redeemText").textContent=`使用 ${cost} 能量兑换？`;$("#redeemRemain").textContent=energy-cost;$("#redeemMask").classList.add("active")});
+$("#confirmRedeem").onclick=()=>{if(!pendingReward)return;energy-=pendingReward.cost;$("#redeemMask").classList.remove("active");const row=document.createElement("div");row.className="ledger-row";row.innerHTML=`<div class="ico">${pendingReward.emoji}</div><div><b>兑换${pendingReward.name}</b><small>刚刚</small></div><div class="amt spend">-${pendingReward.cost}</div>`;$("#ledger").prepend(row);toast(`兑换成功，剩余 ${energy} 能量`);pendingReward=null;refreshEnergy()};
+
+function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+updateTasks();refreshEnergy();
+
+</script>
+</body>
+</html>

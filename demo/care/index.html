@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>托管小站 · 今日托管与积分排行榜</title>
+<style>
+:root{
+  --bg:#f6f8fb;--surface:#fff;--text:#24364b;--muted:#7d8a9e;--line:#e7ebf1;
+  --nav:#26384d;--green:#5bb99f;--green-2:#43aa8b;--green-soft:#edf9f5;
+  --blue:#6fa9ee;--blue-soft:#edf5ff;--gold:#f3c64e;--gold-soft:#fff9e8;
+  --silver:#cbd4df;--silver-soft:#f7f9fb;--bronze:#d79a6d;--bronze-soft:#fff7f1;
+  --shadow:0 7px 18px rgba(35,53,77,.055);
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+button,input,select{font:inherit}button{cursor:pointer}.hidden{display:none!important}
+.app{min-height:100vh;display:grid;grid-template-columns:64px minmax(0,1fr);transition:.2s ease}
+.app.expanded{grid-template-columns:164px minmax(0,1fr)}
+.sidebar{background:var(--nav);color:#fff;padding:10px 7px;display:flex;flex-direction:column;gap:10px}
+.brand{display:flex;align-items:center;gap:9px;padding:2px 5px 11px;border-bottom:1px solid rgba(255,255,255,.12)}
+.brand-icon{width:38px;height:38px;border-radius:13px;background:linear-gradient(145deg,#63cfb2,#f1c865);display:grid;place-items:center;font-size:20px;flex:none}
+.brand-text{display:none;white-space:nowrap}.app.expanded .brand-text{display:block}.brand-text strong{display:block;font-size:17px}.brand-text small{display:block;font-size:11px;color:#b9c5d2;margin-top:2px}
+.collapse{border:0;background:rgba(255,255,255,.08);color:#fff;border-radius:11px;height:36px;font-weight:900}
+.menu{display:grid;gap:6px}.menu button{border:0;background:transparent;color:#dce4ec;border-radius:11px;height:42px;padding:0 12px;text-align:left;font-weight:900;display:flex;align-items:center;gap:9px}.menu button.active{background:rgba(255,255,255,.12);color:#fff}.menu button span:last-child{display:none}.app.expanded .menu button span:last-child{display:inline}
+.main{min-width:0}
+.topbar{height:60px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 18px;position:sticky;top:0;z-index:20}
+.title-group{display:flex;align-items:baseline;gap:12px;min-width:0}.title-group h1{margin:0;font-size:25px;letter-spacing:.2px}.title-group .date{color:var(--muted);font-size:13px;font-weight:800;white-space:nowrap}
+.top-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.rule-pill{height:34px;display:inline-flex;align-items:center;gap:5px;padding:0 10px;border:1px solid var(--line);border-radius:999px;background:#fafbfd;color:#627287;font-size:12px;font-weight:850}.top-add{height:36px;border:0;border-radius:11px;background:var(--green);color:#fff;padding:0 14px;font-size:13px;font-weight:950;box-shadow:0 4px 12px rgba(91,185,159,.2)}
+.content{max-width:1720px;margin:0 auto;padding:16px 20px 18px}.page{display:none}.page.active{display:block}
+.list{display:grid;gap:9px}
+.student-card{position:relative;background:var(--surface);border:1px solid #e9edf2;border-radius:16px;box-shadow:0 4px 14px rgba(35,53,77,.045);padding:10px 12px;min-height:102px;overflow:hidden;transition:border-color .15s,transform .15s,box-shadow .15s}
+.student-card:hover{border-color:#dde4eb;box-shadow:0 7px 20px rgba(35,53,77,.065)}
+.student-card.rank-1{background:#fff;border-color:#eee4c3}.student-card.rank-1:before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 3px 3px 0;background:#e8c250}
+.student-card.rank-2{background:#fff;border-color:#e5e9ee}.student-card.rank-2:before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 3px 3px 0;background:#c8d0da}
+.student-card.rank-3{background:#fff;border-color:#eee1d8}.student-card.rank-3:before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 3px 3px 0;background:#d6a17d}
+.student-grid{display:grid;grid-template-columns:212px minmax(0,1fr) 118px;gap:14px;align-items:center;min-height:80px}
+.left-col{display:grid;grid-template-columns:26px 46px minmax(0,1fr);gap:9px;align-items:center;min-width:0}
+.medal{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:16px;font-weight:700;border:1px solid #e5e9ee;background:#f8fafc;color:#8a98aa}.medal.gold{background:#fff8df;border-color:#ecd67f}.medal.silver{background:#f6f8fa;border-color:#dce2e8}.medal.bronze{background:#fff6ef;border-color:#e4bea3}.medal.none{font-size:11px}
+.pet-ring{--pct:0%;width:46px;height:46px;border-radius:50%;padding:2px;background:conic-gradient(#8bcdb9 var(--pct),#e8efec 0);display:grid;place-items:center}.pet-inner{width:100%;height:100%;border-radius:50%;display:grid;place-items:center;background:#fff;border:2px solid rgba(255,255,255,.98);font-size:22px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.018)}
+.name-box{min-width:0}.name-line{display:flex;align-items:center;gap:8px;min-width:0;white-space:nowrap}.kid-name{overflow:hidden;text-overflow:ellipsis;font-size:19px;font-weight:750;letter-spacing:.05px;color:#2b3f54}.score-chip{flex:none;display:inline-flex;align-items:center;gap:3px;height:24px;padding:0 7px;border-radius:999px;border:0;background:#f3f6f8;color:#5e6f82;font-size:12.5px;font-weight:700}.score-chip.gold,.score-chip.silver,.score-chip.bronze{background:#f3f6f8;color:#5e6f82}
+.route-shell{min-width:0;overflow:hidden;padding-right:12px}.route{display:flex;align-items:flex-start;overflow-x:auto;scrollbar-width:none;padding:2px 1px 0;min-width:100%}.route::-webkit-scrollbar{display:none}
+.empty-route{height:76px;display:flex;align-items:center;justify-content:center;color:#9aa6b5;font-size:12.5px;font-weight:600;letter-spacing:.05px}
+.train-wrap{flex:none;width:68px;text-align:center;position:relative;padding-top:3px}.finish-wrap{flex:none;width:86px;text-align:center;position:relative;padding-top:3px}.train{position:relative;z-index:3;width:28px;height:28px;margin:0 auto;border-radius:50%;display:grid;place-items:center;background:#f2f7fd;border:1px solid #dbe8f6;font-size:16px}.train-wrap:after{content:"";position:absolute;top:17px;left:calc(50% + 14px);right:0;height:2px;background:#dfe5ec;border-radius:999px}.finish-wrap:before{content:"";position:absolute;top:17px;left:0;right:calc(50% + 14px);height:2px;background:#dfe5ec;border-radius:999px}.finish{position:relative;z-index:3;width:28px;height:28px;margin:0 auto;border-radius:50%;display:grid;place-items:center;background:#f8fafb;border:1px solid #dfe5ec;font-size:15px}.finish.done{background:var(--green-soft);border-color:#c8e8dc}.finish-time{margin-top:6px;font-size:10.5px;line-height:1;color:#7b8999;font-weight:600;min-height:14px;white-space:nowrap;text-align:center}
+.step{position:relative;flex:1 0 120px;max-width:220px;text-align:center;padding:0 9px;user-select:none}.step:before,.step:after{content:"";position:absolute;top:17px;height:2px;background:#dfe5ec;border-radius:999px}.step:before{left:0;right:calc(50% + 13px)}.step:after{left:calc(50% + 13px);right:0}.step.done:before,.step.done:after,.step.current:before{background:#a9dcca}.node{position:relative;z-index:3;width:26px;height:26px;margin:4px auto 0;border-radius:50%;border:2px solid #d8e0e8;background:#fff;display:grid;place-items:center;font-size:12px;font-weight:700;color:#96a4b4}.step.done .node{border-color:var(--green);background:var(--green);color:#fff}.step.current .node{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(111,169,238,.13);color:#4c83c2}.step.current .node:after{content:"";position:absolute;inset:-6px;border:1px solid rgba(111,169,238,.14);border-radius:50%}.stop{margin:5px auto 0;min-height:40px;max-width:122px;border:0;border-radius:10px;background:#f8fafc;padding:5px 7px 4px;display:flex;flex-direction:column;justify-content:center}.step.done .stop{background:#f4faf7}.step.current .stop{background:#eef5fd}.task-name{font-size:12px;line-height:1.18;font-weight:650;color:#34495f}.task-time{margin-top:3px;min-height:11px;font-size:10.5px;line-height:1.1;font-weight:550;color:#718397;white-space:nowrap}.task-time:empty{display:none}.step[draggable="true"]{cursor:grab}.step[draggable="true"]:active{cursor:grabbing}
+.actions{display:grid;gap:5px;align-content:center}.btn{height:31px;border:1px solid var(--line);background:#fff;color:var(--text);border-radius:9px;padding:0 8px;font-size:12px;font-weight:650;white-space:nowrap}.btn:hover{border-color:#cfd8e1;background:#fafbfd}.btn.primary{height:36px;background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 3px 8px rgba(91,185,159,.14);font-weight:700}.btn.primary:hover{background:var(--green-2)}.btn.finished{height:36px;background:#eff8f4;border-color:#d0e9df;color:#4a806e;cursor:default}.sub-actions{display:grid;grid-template-columns:1fr 1fr;gap:4px}.sub-actions .btn{height:28px;padding:0 3px;font-size:11px;border-color:transparent;background:transparent;color:#647487}.sub-actions .btn:hover{background:#f5f7f9;border-color:transparent}
+.simple-card{background:#fff;border:1px solid var(--line);border-radius:17px;box-shadow:var(--shadow);padding:16px}.simple-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.rule-item{border:1px solid var(--line);border-radius:13px;padding:13px;background:#fff}.rule-item strong{font-size:16px}.rule-item .sub{margin-top:5px;color:var(--muted);font-size:13px;line-height:1.65}
+.ranking-card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:20px 22px 22px}.ranking-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}.ranking-head h2{margin:0;font-size:22px;font-weight:750;letter-spacing:.1px}.ranking-head p{margin:5px 0 0;color:var(--muted);font-size:12.5px}.period-tabs{display:inline-flex;padding:3px;background:#f3f6f8;border-radius:11px;gap:2px}.period-tabs button{height:31px;padding:0 13px;border:0;border-radius:8px;background:transparent;color:#738295;font-size:12px;font-weight:650}.period-tabs button.active{background:#fff;color:#2f455c;box-shadow:0 2px 7px rgba(35,53,77,.09)}
+.podium{height:270px;margin:8px auto 20px;max-width:760px;display:flex;align-items:flex-end;justify-content:center;gap:10px;padding:20px 24px 0;border-bottom:1px solid #eef1f4;background:linear-gradient(180deg,#fbfcfe 0%,#fff 76%);border-radius:16px 16px 0 0}.podium-slot{width:31%;max-width:210px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}.podium-person{position:relative;margin-bottom:9px}.podium-medal{position:absolute;right:-7px;top:-4px;font-size:24px;filter:drop-shadow(0 3px 5px rgba(45,58,75,.12))}.podium-pet{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;font-size:30px;background:#fff;border:4px solid #f0f3f6;box-shadow:0 6px 18px rgba(35,53,77,.08)}.podium-slot.first .podium-pet{width:72px;height:72px;font-size:35px;border-color:#f3df99}.podium-slot.second .podium-pet{border-color:#dfe5eb}.podium-slot.third .podium-pet{border-color:#ecc9ae}.podium-name{margin-top:8px;font-size:17px;font-weight:780;color:#2f4358;letter-spacing:.1px}.podium-slot.first .podium-name{font-size:18px;font-weight:800}.podium-score{margin-top:3px;font-size:12px;font-weight:700;color:#7b8999}.podium-base{width:100%;margin-top:4px;border-radius:10px 10px 0 0;display:flex;align-items:flex-start;justify-content:center;padding-top:12px;font-size:28px;font-weight:800;color:rgba(65,79,94,.38);box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}.podium-slot.first .podium-base{height:92px;background:linear-gradient(#fff3c6,#f9df87)}.podium-slot.second .podium-base{height:67px;background:linear-gradient(#f4f6f8,#dce2e8)}.podium-slot.third .podium-base{height:51px;background:linear-gradient(#fff0e5,#e8b791)}
+.rank-list-title{display:flex;align-items:center;justify-content:space-between;margin:2px 2px 8px;color:#6f7f91;font-size:12px;font-weight:650}.rank-list{border:1px solid #edf0f3;border-radius:14px;overflow:hidden}.rank-row{height:56px;display:grid;grid-template-columns:46px 38px minmax(0,1fr) auto;gap:10px;align-items:center;padding:0 15px;background:#fff}.rank-row+.rank-row{border-top:1px solid #f0f2f4}.rank-no{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#f4f6f8;color:#738295;font-size:12px;font-weight:750}.rank-pet{font-size:23px;text-align:center}.rank-name{font-size:14px;font-weight:680;color:#33495e}.rank-score{font-size:14px;font-weight:750;color:#516478;white-space:nowrap}.rank-score span{font-size:12px;color:#94a0ae;font-weight:550;margin-left:3px}
+
+/* ===== 统一后台列表组件 ===== */
+.manage-stack{display:grid;gap:14px}.manage-card{background:#fff;border:1px solid var(--line);border-radius:17px;box-shadow:var(--shadow);overflow:hidden}.manage-head{min-height:68px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid #eef1f4}.manage-head h2{margin:0;font-size:19px;font-weight:760;color:#2e4358}.manage-head p{margin:4px 0 0;color:var(--muted);font-size:12px;line-height:1.5}.manage-add{height:34px!important;padding:0 13px!important;flex:none}.table-wrap{overflow-x:auto}.manage-table{width:100%;border-collapse:collapse;min-width:680px}.manage-table th{height:38px;padding:0 16px;background:#fafbfd;color:#8491a1;font-size:11.5px;font-weight:650;text-align:left;border-bottom:1px solid #edf0f3;white-space:nowrap}.manage-table td{height:53px;padding:0 16px;border-bottom:1px solid #f0f2f4;font-size:13px;color:#3d5166;vertical-align:middle}.manage-table tr:last-child td{border-bottom:0}.manage-table tbody tr:hover{background:#fbfcfd}.cell-main{font-size:13.5px;font-weight:680;color:#31465a}.cell-sub{margin-top:3px;font-size:11px;color:#94a0ae}.student-cell{display:flex;align-items:center;gap:9px}.student-mini-pet{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:19px;background:#f7f9fb;border:1px solid #edf0f3}.grade-tag,.status-tag{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:999px;background:#f4f7f9;color:#67788b;font-size:11.5px;font-weight:650}.status-tag.active{background:#edf8f4;color:#4f8874}.table-actions{display:flex;justify-content:flex-end;gap:4px}.text-btn{height:28px;border:0;background:transparent;border-radius:7px;padding:0 8px;color:#587087;font-size:11.5px;font-weight:650}.text-btn:hover{background:#f3f6f8}.text-btn.danger{color:#b36a6a}.text-btn.danger:hover{background:#fff3f3}.score-positive{color:#39816a;font-weight:720}.score-negative{color:#b35e5e;font-weight:720}.page-note{color:#8b98a8;font-size:12px;margin:0 0 10px 2px}.empty-table{text-align:center!important;color:#9aa6b5!important;height:72px!important}
+/* 排行榜动作 */
+.podium-actions{margin-top:7px;display:flex;justify-content:center;gap:4px}.podium-actions button{height:25px;border:0;border-radius:7px;background:#f4f6f8;color:#64778a;padding:0 7px;font-size:10.5px;font-weight:650}.podium-actions button:hover{background:#eaf0f4}.rank-row{grid-template-columns:46px 38px minmax(0,1fr) auto 112px}.rank-actions{display:flex;justify-content:flex-end;gap:3px}.rank-actions button{height:27px;border:0;border-radius:7px;background:transparent;color:#60758b;padding:0 7px;font-size:11px;font-weight:650}.rank-actions button:hover{background:#f3f6f8}.rank-balance{font-size:11px;color:#98a4b1;margin-left:7px;font-weight:550}
+/* 统一编辑弹层 */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.form-grid.one{grid-template-columns:1fr}.form-group label{display:block;margin:0 0 6px;font-size:12px;font-weight:650;color:#68798c}.form-group .field{height:40px}.modal-note{margin-top:10px;color:#8c99a8;font-size:11.5px;line-height:1.6}.detail-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}.summary-box{padding:11px 12px;border:1px solid #edf0f3;border-radius:11px;background:#fafbfd}.summary-box span{display:block;font-size:11px;color:#8996a5}.summary-box strong{display:block;margin-top:4px;font-size:17px;color:#33495e}.ledger-list{border:1px solid #edf0f3;border-radius:12px;overflow:hidden}.ledger-row{min-height:48px;display:grid;grid-template-columns:92px minmax(0,1fr) auto;gap:10px;align-items:center;padding:7px 12px;background:#fff}.ledger-row+.ledger-row{border-top:1px solid #f0f2f4}.ledger-date{font-size:11.5px;color:#95a1af}.ledger-name{font-size:13px;color:#3b5065}.ledger-score{font-size:13px;font-weight:750}.reward-list{display:grid;gap:7px}.reward-choice{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;border:1px solid #edf0f3;border-radius:11px;padding:10px 12px}.reward-choice strong{font-size:13.5px}.reward-choice span{color:#8b98a8;font-size:12px}.reward-choice .cost{font-weight:750;color:#6f7f91;white-space:nowrap}.reward-choice button:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:900px){.manage-head{align-items:flex-start}.manage-table{min-width:620px}.form-grid{grid-template-columns:1fr}.detail-summary{grid-template-columns:1fr}.rank-row{grid-template-columns:38px 32px minmax(0,1fr) auto}.rank-actions{grid-column:3/-1;justify-content:flex-start;padding-bottom:7px}.rank-row{height:auto;min-height:62px;padding-top:7px}.podium-actions{gap:2px}.podium-actions button{padding:0 5px}}
+
+.modal{position:fixed;inset:0;background:rgba(28,40,55,.38);display:none;align-items:center;justify-content:center;padding:18px;z-index:60}.modal.show{display:flex}.modal-box{width:min(730px,100%);max-height:88vh;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 24px 70px rgba(23,37,53,.2)}.modal-head{height:58px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 17px;border-bottom:1px solid var(--line)}.modal-head h3{margin:0;font-size:20px}.modal-body{padding:16px 17px 18px}
+.fields{display:grid;grid-template-columns:130px 120px minmax(0,1fr) auto;gap:9px;align-items:center}.field{width:100%;height:42px;border:1px solid var(--line);border-radius:11px;padding:0 11px;background:#fff;color:var(--text);font-size:14px}.field:focus{outline:3px solid rgba(111,169,238,.15);border-color:#a8c8ef}.quick-list,.time-quick{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.quick{height:34px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:0 12px;font-size:13px;font-weight:900}.quick:hover{background:#f7f9fc}.point-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.point-item{border:1px solid var(--line);border-radius:13px;padding:11px 13px;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:10px}.point-item.plus{background:#f5fbf8}.point-item.minus{background:#fff5f5}.point-item strong{font-size:15px}.point-item span{display:block;font-size:12px;color:var(--muted);margin-top:3px}.help{margin-top:10px;padding:10px 12px;border-radius:12px;background:#f7f9fc;border:1px solid var(--line);font-size:13px;color:var(--muted);line-height:1.6}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.toast{position:fixed;left:50%;bottom:20px;z-index:80;transform:translateX(-50%) translateY(15px);background:#26384d;color:#fff;padding:10px 14px;border-radius:11px;font-size:13px;font-weight:900;opacity:0;pointer-events:none;transition:.2s}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:1250px){.student-grid{grid-template-columns:198px minmax(0,1fr) 112px}.left-col{grid-template-columns:24px 42px minmax(0,1fr);gap:7px}.pet-ring{width:42px;height:42px}.kid-name{font-size:18px}.step{flex-basis:104px;max-width:170px}.train-wrap{width:60px}.finish-wrap{width:80px}}
+@media(max-width:900px){.app,.app.expanded{grid-template-columns:1fr}.sidebar{display:none}.topbar{height:auto;min-height:60px;padding:10px 12px;flex-wrap:wrap}.content{padding:9px 10px}.student-grid{grid-template-columns:1fr}.actions{grid-template-columns:1fr 1fr}.actions .primary,.actions .finished{grid-column:1/-1}.fields{grid-template-columns:1fr}.simple-grid,.point-grid{grid-template-columns:1fr}.ranking-card{padding:15px 12px}.ranking-head{align-items:stretch;flex-direction:column}.period-tabs{align-self:flex-start}.podium{height:245px;padding-left:4px;padding-right:4px}.podium-pet{width:54px;height:54px;font-size:26px}.podium-slot.first .podium-pet{width:62px;height:62px;font-size:30px}.rank-row{grid-template-columns:38px 32px minmax(0,1fr) auto;padding:0 10px}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-icon">🚂</div><div class="brand-text"><strong>托管小站</strong><small>路线 · 积分 · 能量</small></div></div>
+    <button class="collapse" id="toggleNav">☰</button>
+    <nav class="menu">
+      <button class="active" data-page="home"><span>🏠</span><span>今日托管</span></button>
+      <button data-page="students"><span>🏆</span><span>排行榜</span></button>
+      <button data-page="manage"><span>👦</span><span>学生管理</span></button>
+      <button data-page="settings"><span>⚙️</span><span>设置</span></button>
+    </nav>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div class="title-group"><h1 id="pageTitle">今日托管</h1><span class="date" id="todayText"></span></div>
+      <div class="top-actions" id="homeTopActions">
+        <span class="rule-pill" id="baseScorePill">⭐ 基础20分</span>
+        <span class="rule-pill" id="finishBonusPill">🏁 18:00前完成 +2</span>
+        <button class="top-add" id="openRegister">＋ 快速登记作业</button>
+      </div>
+    </header>
+    <div class="content">
+      <section class="page active" id="page-home"><div class="list" id="studentList"></div></section>
+      <section class="page" id="page-students">
+        <div class="ranking-card">
+          <div class="ranking-head">
+            <div><h2>积分排行榜</h2><p>每一次认真完成，都在向前一步 · 点击可查看积分明细或兑换奖励</p></div>
+            <div class="period-tabs" id="periodTabs">
+              <button class="active" data-period="day">日榜</button>
+              <button data-period="week">周榜</button>
+              <button data-period="month">月榜</button>
+            </div>
+          </div>
+          <div class="podium" id="podium"></div>
+          <div class="rank-list-title"><span>其他排名</span><span id="rankPeriodLabel">今日积分</span></div>
+          <div class="rank-list" id="studentGrid"></div>
+        </div>
+      </section>
+      <section class="page" id="page-manage">
+        <div class="manage-card">
+          <div class="manage-head"><div><h2>学生管理</h2><p>维护托管学生基础资料；年级暂作为档案字段保留。</p></div><button class="btn primary manage-add" id="addStudentBtn">＋ 新增学生</button></div>
+          <div class="table-wrap"><table class="manage-table"><thead><tr><th>学生</th><th>年级</th><th>可用积分</th><th>状态</th><th style="text-align:right">操作</th></tr></thead><tbody id="studentManageBody"></tbody></table></div>
+        </div>
+      </section>
+      <section class="page" id="page-settings">
+        <div class="manage-stack">
+          <div class="manage-card">
+            <div class="manage-head"><div><h2>参数设置</h2><p>基础分、完成时间等系统级参数统一维护。</p></div><button class="btn primary manage-add" id="addParamBtn">＋ 新增参数</button></div>
+            <div class="table-wrap"><table class="manage-table"><thead><tr><th>参数名称</th><th>参数值</th><th style="text-align:right">操作</th></tr></thead><tbody id="paramBody"></tbody></table></div>
+          </div>
+          <div class="manage-card">
+            <div class="manage-head"><div><h2>积分规则</h2><p>这里只保留规则名称和分值；正数加分，负数扣分。</p></div><button class="btn primary manage-add" id="addRuleBtn">＋ 新增规则</button></div>
+            <div class="table-wrap"><table class="manage-table"><thead><tr><th>规则名称</th><th>分值</th><th style="text-align:right">操作</th></tr></thead><tbody id="ruleBody"></tbody></table></div>
+          </div>
+          <div class="manage-card">
+            <div class="manage-head"><div><h2>兑换奖励</h2><p>排行榜中的“兑换”直接读取这里维护的奖励。</p></div><button class="btn primary manage-add" id="addRewardBtn">＋ 新增奖励</button></div>
+            <div class="table-wrap"><table class="manage-table"><thead><tr><th>奖励名称</th><th>所需积分</th><th style="text-align:right">操作</th></tr></thead><tbody id="rewardBody"></tbody></table></div>
+          </div>
+          <div class="manage-card">
+            <div class="manage-head"><div><h2>计时任务</h2><p>只有命中的任务类型才显示“已用 / 耗时”；当前默认数学需要计时。</p></div><button class="btn primary manage-add" id="addTimedBtn">＋ 新增计时任务</button></div>
+            <div class="table-wrap"><table class="manage-table"><thead><tr><th>任务类型</th><th>记录实际耗时</th><th style="text-align:right">操作</th></tr></thead><tbody id="timedBody"></tbody></table></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="modal" id="taskModal"><div class="modal-box">
+  <div class="modal-head"><h3 id="taskModalTitle">登记今日作业</h3><button class="btn" data-close="taskModal">关闭</button></div>
+  <div class="modal-body">
+    <div class="fields"><select class="field" id="taskStudent"></select><select class="field" id="taskSubject"><option>语文</option><option>数学</option><option>英语</option><option>阅读</option><option>休息</option></select><input class="field" id="taskName" placeholder="如：口算、练习册、生字、阅读20分钟"><button class="btn primary" id="saveTaskBtn">加入路线</button></div>
+    <div class="quick-list" id="quickTasks"></div>
+  </div>
+</div></div>
+
+<div class="modal" id="pointModal"><div class="modal-box">
+  <div class="modal-head"><h3 id="pointTitle">加 / 扣积分</h3><button class="btn" data-close="pointModal">关闭</button></div>
+  <div class="modal-body"><div class="point-grid" id="pointGrid"></div></div>
+</div></div>
+
+<div class="modal" id="timeModal"><div class="modal-box" style="width:min(520px,100%)">
+  <div class="modal-head"><h3 id="timeTitle">录入实际用时</h3><button class="btn" data-close="timeModal">关闭</button></div>
+  <div class="modal-body">
+    <input class="field" id="actualTimeInput" placeholder="例如：5:40">
+    <div class="time-quick"><button class="quick" data-time="5:00">5分</button><button class="quick" data-time="10:00">10分</button><button class="quick" data-time="15:00">15分</button><button class="quick" data-time="20:00">20分</button></div>
+    <div class="help">支持 5:40、00:05:40、5分40秒。完成站点后双击即可补录或修改。</div>
+    <div class="modal-actions"><button class="btn" data-close="timeModal">取消</button><button class="btn primary" id="saveTimeBtn">保存</button></div>
+  </div>
+</div></div>
+
+<div class="modal" id="studentEditModal"><div class="modal-box" style="width:min(560px,100%)">
+  <div class="modal-head"><h3 id="studentEditTitle">新增学生</h3><button class="btn" data-close="studentEditModal">关闭</button></div>
+  <div class="modal-body"><div class="form-grid"><div class="form-group"><label>学生姓名</label><input class="field" id="studentNameInput" placeholder="请输入姓名"></div><div class="form-group"><label>年级</label><select class="field" id="studentGradeInput"><option>一年级</option><option selected>二年级</option><option>三年级</option><option>四年级</option><option>五年级</option><option>六年级</option></select></div><div class="form-group"><label>宠物</label><input class="field" id="studentPetInput" value="🐣" placeholder="输入一个表情，如 🐼"></div><div class="form-group"><label>状态</label><select class="field" id="studentStatusInput"><option value="active">正常</option><option value="inactive">停用</option></select></div></div><div class="modal-actions"><button class="btn" data-close="studentEditModal">取消</button><button class="btn primary" id="saveStudentEditBtn">保存</button></div></div>
+</div></div>
+
+<div class="modal" id="simpleEditModal"><div class="modal-box" style="width:min(520px,100%)">
+  <div class="modal-head"><h3 id="simpleEditTitle">新增</h3><button class="btn" data-close="simpleEditModal">关闭</button></div>
+  <div class="modal-body"><div class="form-grid one"><div class="form-group"><label id="simpleNameLabel">名称</label><input class="field" id="simpleNameInput"></div><div class="form-group"><label id="simpleValueLabel">数值</label><input class="field" id="simpleValueInput"></div></div><div class="modal-note" id="simpleEditNote"></div><div class="modal-actions"><button class="btn" data-close="simpleEditModal">取消</button><button class="btn primary" id="saveSimpleEditBtn">保存</button></div></div>
+</div></div>
+
+<div class="modal" id="scoreDetailModal"><div class="modal-box" style="width:min(650px,100%)">
+  <div class="modal-head"><h3 id="scoreDetailTitle">积分明细</h3><button class="btn" data-close="scoreDetailModal">关闭</button></div>
+  <div class="modal-body"><div class="detail-summary"><div class="summary-box"><span>排行积分</span><strong id="detailRankScore">0</strong></div><div class="summary-box"><span>累计兑换</span><strong id="detailRedeemed">0</strong></div><div class="summary-box"><span>可用积分</span><strong id="detailAvailable">0</strong></div></div><div class="ledger-list" id="ledgerList"></div></div>
+</div></div>
+
+<div class="modal" id="redeemModal"><div class="modal-box" style="width:min(590px,100%)">
+  <div class="modal-head"><h3 id="redeemTitle">积分兑换</h3><button class="btn" data-close="redeemModal">关闭</button></div>
+  <div class="modal-body"><div class="help" id="redeemBalance" style="margin-top:0;margin-bottom:10px"></div><div class="reward-list" id="redeemList"></div></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  const KEY='care_station_full_admin_v1';
+  const now=Date.now();
+  const defaults={settings:{baseScore:20,finishBonus:2},students:[
+    {id:1,name:'王小明',grade:'二年级',pet:'🦁',scoreDelta:9,redeemed:0,status:'active',registered:true,bonusGiven:false,routeStartAt:null,routeEndAt:null,tasks:[
+      {id:'a1',name:'语文练习册',subject:'语文',actualSec:null,status:'todo'},{id:'a2',name:'数学口算',subject:'数学',actualSec:null,status:'todo'},{id:'a3',name:'生字抄写',subject:'语文',actualSec:null,status:'todo'},{id:'a4',name:'阅读20分钟',subject:'阅读',actualSec:null,status:'todo'}]},
+    {id:2,name:'张新尧',grade:'二年级',pet:'🐥',scoreDelta:7,redeemed:10,status:'active',registered:true,bonusGiven:false,routeStartAt:now-31*60*1000,routeEndAt:null,tasks:[
+      {id:'b1',name:'数学口算',subject:'数学',actualSec:340,status:'done'},{id:'b2',name:'语文练习册',subject:'语文',actualSec:null,status:'current',startedAt:now-8*60*1000},{id:'b3',name:'生字抄写',subject:'语文',actualSec:null,status:'todo'},{id:'b4',name:'英语预习',subject:'英语',actualSec:null,status:'todo'},{id:'b5',name:'阅读20分钟',subject:'阅读',actualSec:null,status:'todo'}]},
+    {id:3,name:'李然',grade:'三年级',pet:'🐼',scoreDelta:6,redeemed:0,status:'active',registered:true,bonusGiven:true,routeStartAt:now-49*60*1000,routeEndAt:now-4*60*1000,tasks:[
+      {id:'c1',name:'生字抄写',subject:'语文',actualSec:310,status:'done'},{id:'c2',name:'语文练习册',subject:'语文',actualSec:610,status:'done'},{id:'c3',name:'数学天天练',subject:'数学',actualSec:760,status:'done'},{id:'c4',name:'阅读20分钟',subject:'阅读',actualSec:1180,status:'done'}]},
+    {id:4,name:'周子涵',grade:'二年级',pet:'🐰',scoreDelta:3,redeemed:5,status:'active',registered:true,bonusGiven:false,routeStartAt:now-24*60*1000,routeEndAt:null,tasks:[
+      {id:'d1',name:'数学口算',subject:'数学',actualSec:295,status:'done'},{id:'d2',name:'英语预习',subject:'英语',actualSec:null,status:'current',startedAt:now-7*60*1000},{id:'d3',name:'阅读20分钟',subject:'阅读',actualSec:null,status:'todo'}]},
+    {id:5,name:'董皓文',grade:'一年级',pet:'🐯',scoreDelta:1,redeemed:0,status:'active',registered:true,bonusGiven:false,routeStartAt:now-18*60*1000,routeEndAt:null,tasks:[
+      {id:'e1',name:'天天练',subject:'数学',actualSec:null,status:'current',startedAt:now-18*60*1000},{id:'e2',name:'生字',subject:'语文',actualSec:null,status:'todo'},{id:'e3',name:'阅读20分钟',subject:'阅读',actualSec:null,status:'todo'}]},
+    {id:6,name:'陈一诺',grade:'三年级',pet:'🐸',scoreDelta:-2,redeemed:0,status:'active',registered:true,bonusGiven:false,routeStartAt:null,routeEndAt:null,tasks:[
+      {id:'f1',name:'数学口算',subject:'数学',actualSec:null,status:'todo'},{id:'f2',name:'语文练习册',subject:'语文',actualSec:null,status:'todo'},{id:'f3',name:'生字抄写',subject:'语文',actualSec:null,status:'todo'}]},
+    {id:7,name:'赵梓轩',grade:'二年级',pet:'🦊',scoreDelta:-3,redeemed:0,status:'active',registered:false,bonusGiven:false,routeStartAt:null,routeEndAt:null,tasks:[]}
+  ]};
+  const quick=[['语文练习册','语文'],['生字抄写','语文'],['数学口算','数学'],['数学天天练','数学'],['英语预习','英语'],['阅读20分钟','阅读'],['休息5分钟','休息'],['整理书包','阅读']];
+  const defaultPointRules=[{id:'r1',label:'老师表扬',delta:1},{id:'r2',label:'作业改优',delta:1},{id:'r3',label:'主动帮助他人',delta:1},{id:'r4',label:'主动加练',delta:1},{id:'r5',label:'多次离座',delta:-5},{id:'r6',label:'公共区吵闹',delta:-5},{id:'r7',label:'聊天打闹',delta:-10},{id:'r8',label:'作业态度不认真',delta:-10}];
+  const defaultParams=[{id:'p1',key:'baseScore',name:'每日基础分',value:'20'},{id:'p2',key:'finishBefore',name:'提前完成时间',value:'18:00'},{id:'p3',key:'finishBonus',name:'提前完成奖励',value:'2'}];
+  const defaultRewards=[{id:'w1',name:'贴纸一张',cost:10},{id:'w2',name:'小零食',cost:20},{id:'w3',name:'自由活动10分钟',cost:30},{id:'w4',name:'优先选座一次',cost:40}];
+  const defaultTimed=[{id:'tmath',name:'数学',enabled:true}];
+  let state=load(),pointStudentId=null,timeCtx=null,taskStudentId=null,dragCtx=null,studentEditId=null,simpleEditCtx=null,rankStudentId=null;
+  const $=s=>document.querySelector(s), app=$('#app');
+  function clone(o){return JSON.parse(JSON.stringify(o))}
+  function normalizeState(s){s=s||clone(defaults);s.settings=s.settings||{baseScore:20,finishBonus:2};s.params=s.params||clone(defaultParams);s.pointRules=s.pointRules||clone(defaultPointRules);s.rewards=s.rewards||clone(defaultRewards);s.timedTasks=s.timedTasks||clone(defaultTimed);s.students=(s.students||[]).map((st,i)=>({...st,grade:st.grade||'二年级',status:st.status||'active',redeemed:Number(st.redeemed||0),redemptions:st.redemptions||[],ledger:st.ledger||[]}));return s}
+  function load(){try{const raw=localStorage.getItem(KEY);if(raw)return normalizeState(JSON.parse(raw))}catch(e){}return normalizeState(clone(defaults))}
+  function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+  function applyParams(){const base=state.params.find(x=>x.key==='baseScore'),bonus=state.params.find(x=>x.key==='finishBonus'),before=state.params.find(x=>x.key==='finishBefore');if(base&&!isNaN(+base.value))state.settings.baseScore=+base.value;if(bonus&&!isNaN(+bonus.value))state.settings.finishBonus=+bonus.value;state.settings.finishBefore=before?before.value:'18:00'}
+  function totalScore(s){return (state.settings.baseScore||20)+(s.scoreDelta||0)}
+  function availableScore(s){return Math.max(0,totalScore(s)-Number(s.redeemed||0))}
+  function isTimedTask(t){return state.timedTasks.some(x=>x.enabled!==false&&(x.name===t.subject||t.name.includes(x.name)))}
+  function done(s){return s.tasks.filter(t=>t.status==='done').length}
+  function pct(s){return s.tasks.length?Math.round(done(s)/s.tasks.length*100):0}
+  function current(s){return s.tasks.find(t=>t.status==='current')||null}
+  function started(s){return !!s.routeStartAt||s.tasks.some(t=>t.status==='current'||t.status==='done')}
+  function finished(s){return s.tasks.length>0&&done(s)===s.tasks.length}
+  function elapsedSec(s){if(!s.routeStartAt)return 0;return Math.max(0,Math.round(((s.routeEndAt||Date.now())-s.routeStartAt)/1000))}
+  function sorted(){return [...state.students].sort((a,b)=>(totalScore(b)-totalScore(a))||(pct(b)-pct(a)))}
+  function mcls(i){return i===0?'gold':i===1?'silver':i===2?'bronze':'none'}
+  function mtxt(i){return i===0?'🥇':i===1?'🥈':i===2?'🥉':String(i+1)}
+  function deltaText(s){const d=s.scoreDelta||0;return d===0?'今日积分无变化':`今日${d>0?'+':''}${d}分`}
+  function timeText(sec){if(sec==null||isNaN(sec))return '';sec=Math.max(0,Math.round(sec));const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),ss=sec%60;if(h>0)return `${h}时${m}分`;return ss?`${m}分${ss}秒`:`${m}分`}
+  function inputTime(sec){if(sec==null)return '';sec=Math.round(sec);const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),ss=sec%60;return h?`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`:`${m}:${String(ss).padStart(2,'0')}`}
+  function parseTime(v){if(!v)return null;let t=String(v).trim();if(/^\d+:\d+$/.test(t)){const [m,s]=t.split(':').map(Number);return m*60+s}if(/^\d+:\d+:\d+$/.test(t)){const [h,m,s]=t.split(':').map(Number);return h*3600+m*60+s}t=t.replace(/小时/g,'时').replace(/分钟/g,'分');const h=(t.match(/(\d+)时/)||[,'0'])[1],m=(t.match(/(\d+)分/)||[,'0'])[1],s=(t.match(/(\d+)秒/)||[,'0'])[1];if(h!=='0'||m!=='0'||s!=='0')return +h*3600 + +m*60 + +s;return null}
+  function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),1700)}
+  function ensure(s){const cs=s.tasks.filter(t=>t.status==='current');if(cs.length>1){let kept=false;s.tasks.forEach(t=>{if(t.status==='current'){if(!kept)kept=true;else t.status='todo'}})}}
+  function startRoute(id){const s=state.students.find(x=>x.id===id);if(!s||!s.tasks.length){toast('请先登记作业');return}if(started(s)){toast(`${s.name} 已经出发了`);return}s.routeStartAt=Date.now();s.tasks[0].status='current';s.tasks[0].startedAt=Date.now();save();render();toast(`${s.name} 出发啦 🚂`)}
+  function completeCurrent(id){const s=state.students.find(x=>x.id===id),t=s&&current(s);if(!t){toast('当前没有进行中的任务');return}if(isTimedTask(t)&&t.actualSec==null&&t.startedAt)t.actualSec=Math.max(0,Math.round((Date.now()-t.startedAt)/1000));t.status='done';delete t.startedAt;const next=s.tasks.find(x=>x.status==='todo');if(next){next.status='current';next.startedAt=Date.now()}else{s.routeEndAt=Date.now();if(!s.bonusGiven){s.bonusGiven=true;s.scoreDelta+=(state.settings.finishBonus||2)}}save();render();toast(next?`${s.name} 前进一站`:`🏁 ${s.name} 到终点啦`)}
+  function addTask(id,subject,name){const s=state.students.find(x=>x.id===id);if(!s||!name)return;s.registered=true;s.tasks.push({id:`t${Date.now()}${Math.random().toString(16).slice(2,6)}`,name,subject,actualSec:null,status:'todo'});save();render();toast(`已加入「${name}」`)}
+  function renderCard(s,i){ensure(s);const c=mcls(i),isFinished=finished(s),isStarted=started(s);const main=!s.tasks.length?`<button class="btn primary" data-add="${s.id}">＋ 任务</button>`:!isStarted?`<button class="btn primary" data-start="${s.id}">🚂 出发</button>`:isFinished?`<button class="btn finished" disabled>✓ 已完成</button>`:`<button class="btn primary" data-complete="${s.id}">✓ 完成当前站</button>`;
+    const routeHtml=!s.tasks.length?`<div class="empty-route">还没登记作业</div>`:`<div class="route"><div class="train-wrap"><div class="train">🚂</div></div>${s.tasks.map((t,idx)=>{const timed=isTimedTask(t);let shownTime='';if(timed&&t.status==='current'&&t.startedAt){shownTime='已用 '+timeText(Math.max(0,Math.round((Date.now()-t.startedAt)/1000)))}else if(timed&&t.status==='done'&&t.actualSec!=null){shownTime='耗时'+timeText(t.actualSec)}return `<div class="step ${t.status} ${timed?'timed':''}" data-student="${s.id}" data-index="${idx}" data-task="${t.id}" draggable="${t.status==='todo'}"><div class="node">${t.status==='done'?'✓':t.status==='current'?'●':'·'}</div><div class="stop"><div class="task-name">${t.name}</div><div class="task-time">${shownTime}</div></div></div>`}).join('')}<div class="finish-wrap"><div class="finish ${isFinished?'done':''}">🏁</div><div class="finish-time">${s.routeStartAt?(isFinished?'共 ':'累计 ')+timeText(elapsedSec(s)):''}</div></div></div>`;
+    const subActions=s.tasks.length?`<button class="btn" data-add="${s.id}">＋任务</button><button class="btn" data-point="${s.id}">±积分</button>`:'';
+    return `<div class="student-card ${i<3?`rank-${i+1}`:''}"><div class="student-grid">
+    <div class="left-col"><div class="medal ${c}">${mtxt(i)}</div><div class="pet-ring" style="--pct:${pct(s)}%"><div class="pet-inner">${s.pet}</div></div><div class="name-box"><div class="name-line"><span class="kid-name">${s.name}</span><span class="score-chip ${c}">⭐${totalScore(s)}</span></div></div></div>
+    <div class="route-shell">${routeHtml}</div>
+    <div class="actions">${main}${subActions?`<div class="sub-actions">${subActions}</div>`:''}</div>
+  </div></div>`}
+  function renderHome(){ $('#studentList').innerHTML=sorted().map(renderCard).join('');bindHome();bindDrag() }
+  function bindHome(){document.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>startRoute(+b.dataset.start));document.querySelectorAll('[data-complete]').forEach(b=>b.onclick=()=>completeCurrent(+b.dataset.complete));document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>openTask(+b.dataset.add));document.querySelectorAll('[data-point]').forEach(b=>b.onclick=()=>openPoint(+b.dataset.point));document.querySelectorAll('.step.done.timed').forEach(el=>el.ondblclick=()=>openTime(+el.dataset.student,el.dataset.task))}
+  function bindDrag(){document.querySelectorAll('.step[draggable="true"]').forEach(el=>{el.ondragstart=()=>{dragCtx={id:+el.dataset.student,index:+el.dataset.index};el.style.opacity='.45'};el.ondragend=()=>{el.style.opacity='1';dragCtx=null};el.ondragover=e=>e.preventDefault();el.ondrop=e=>{e.preventDefault();if(!dragCtx||dragCtx.id!==+el.dataset.student)return;const s=state.students.find(x=>x.id===dragCtx.id),to=+el.dataset.index,from=dragCtx.index;if(!s||from===to||s.tasks[from].status!=='todo'||s.tasks[to].status!=='todo')return;const m=s.tasks.splice(from,1)[0];s.tasks.splice(to,0,m);save();render();toast('路线顺序已调整')}})}
+  let rankPeriod='day';
+  const priorScores={week:{1:128,2:136,3:124,4:120,5:112,6:104,7:97},month:{1:468,2:482,3:496,4:451,5:443,6:421,7:409}};
+  function rankScore(s,period=rankPeriod){if(period==='day')return totalScore(s);return (priorScores[period]?.[s.id]||0)+totalScore(s)}
+  function ranked(period=rankPeriod){return [...state.students].sort((a,b)=>(rankScore(b,period)-rankScore(a,period))||(a.id-b.id))}
+  function renderStudents(){const arr=ranked();const top=arr.slice(0,3),rest=arr.slice(3);const order=[top[1],top[0],top[2]].filter(Boolean);const classes=['second','first','third'];const nums=['2','1','3'];const medals=['🥈','🥇','🥉'];
+    $('#podium').innerHTML=order.map((s,idx)=>`<div class="podium-slot ${classes[idx]}"><div class="podium-person"><div class="podium-medal">${medals[idx]}</div><div class="podium-pet">${s.pet}</div><div class="podium-name">${s.name}</div><div class="podium-score">⭐ ${rankScore(s)} 分</div><div class="podium-actions"><button data-detail="${s.id}">积分明细</button><button data-redeem="${s.id}">兑换</button></div></div><div class="podium-base">${nums[idx]}</div></div>`).join('');
+    $('#studentGrid').innerHTML=rest.length?rest.map((s,idx)=>`<div class="rank-row"><div class="rank-no">${idx+4}</div><div class="rank-pet">${s.pet}</div><div class="rank-name">${s.name}</div><div class="rank-score">⭐ ${rankScore(s)}<span>分</span><span class="rank-balance">可用${availableScore(s)}</span></div><div class="rank-actions"><button data-detail="${s.id}">明细</button><button data-redeem="${s.id}">兑换</button></div></div>`).join(''):`<div class="rank-row"><div class="rank-name" style="grid-column:1/-1;text-align:center;color:var(--muted)">暂无更多学生</div></div>`;
+    const label={day:'今日积分',week:'本周积分',month:'本月积分'}[rankPeriod];$('#rankPeriodLabel').textContent=label;document.querySelectorAll('[data-period]').forEach(b=>b.classList.toggle('active',b.dataset.period===rankPeriod));bindPeriodTabs();bindRankActions() }
+  function bindPeriodTabs(){document.querySelectorAll('[data-period]').forEach(b=>b.onclick=()=>{rankPeriod=b.dataset.period;renderStudents()})}
+  function bindRankActions(){document.querySelectorAll('[data-detail]').forEach(b=>b.onclick=()=>openScoreDetail(+b.dataset.detail));document.querySelectorAll('[data-redeem]').forEach(b=>b.onclick=()=>openRedeem(+b.dataset.redeem))}
+  function renderTaskSelect(){ $('#taskStudent').innerHTML=sorted().map(s=>`<option value="${s.id}">${s.name}</option>`).join('');if(taskStudentId)$('#taskStudent').value=String(taskStudentId) }
+  function renderQuick(){ $('#quickTasks').innerHTML=quick.map(q=>`<button class="quick" data-q-name="${q[0]}" data-q-sub="${q[1]}">${q[0]}</button>`).join('');document.querySelectorAll('[data-q-name]').forEach(b=>b.onclick=()=>{$('#taskName').value=b.dataset.qName;$('#taskSubject').value=b.dataset.qSub}) }
+  function renderPoints(){ $('#pointGrid').innerHTML=state.pointRules.map(r=>`<button class="point-item ${r.delta>0?'plus':'minus'}" data-delta="${r.delta}" data-label="${r.label}"><div><strong>${r.label}</strong><span>点击立即记录</span></div><b style="font-size:23px;color:${r.delta>0?'#358066':'#b65757'}">${r.delta>0?'+':''}${r.delta}</b></button>`).join('');document.querySelectorAll('[data-delta]').forEach(b=>b.onclick=()=>{const s=state.students.find(x=>x.id===pointStudentId);const delta=+b.dataset.delta;s.scoreDelta+=delta;s.ledger.push({date:'今天',name:b.dataset.label,delta});save();close('pointModal');render();toast(`${s.name} ${delta>0?'+':''}${delta}分`)}) }
+  function renderManagement(){
+    $('#studentManageBody').innerHTML=state.students.length?state.students.map(s=>`<tr><td><div class="student-cell"><div class="student-mini-pet">${s.pet}</div><div><div class="cell-main">${s.name}</div><div class="cell-sub">ID ${s.id}</div></div></div></td><td><span class="grade-tag">${s.grade}</span></td><td><span class="cell-main">⭐ ${availableScore(s)}</span></td><td><span class="status-tag ${s.status==='active'?'active':''}">${s.status==='active'?'正常':'停用'}</span></td><td><div class="table-actions"><button class="text-btn" data-edit-student="${s.id}">修改</button><button class="text-btn danger" data-del-student="${s.id}">删除</button></div></td></tr>`).join(''):`<tr><td colspan="5" class="empty-table">暂无学生</td></tr>`;
+    $('#paramBody').innerHTML=state.params.map(x=>`<tr><td><span class="cell-main">${x.name}</span></td><td>${x.key==='finishBonus'?'+'+x.value:x.value}${x.key==='baseScore'||x.key==='finishBonus'?' 分':''}</td><td><div class="table-actions"><button class="text-btn" data-edit-param="${x.id}">修改</button><button class="text-btn danger" data-del-param="${x.id}">删除</button></div></td></tr>`).join('');
+    $('#ruleBody').innerHTML=state.pointRules.map(x=>`<tr><td><span class="cell-main">${x.label}</span></td><td><span class="${x.delta>=0?'score-positive':'score-negative'}">${x.delta>0?'+':''}${x.delta}</span></td><td><div class="table-actions"><button class="text-btn" data-edit-rule="${x.id}">修改</button><button class="text-btn danger" data-del-rule="${x.id}">删除</button></div></td></tr>`).join('');
+    $('#rewardBody').innerHTML=state.rewards.map(x=>`<tr><td><span class="cell-main">${x.name}</span></td><td>⭐ ${x.cost}</td><td><div class="table-actions"><button class="text-btn" data-edit-reward="${x.id}">修改</button><button class="text-btn danger" data-del-reward="${x.id}">删除</button></div></td></tr>`).join('');
+    $('#timedBody').innerHTML=state.timedTasks.map(x=>`<tr><td><span class="cell-main">${x.name}</span></td><td><span class="status-tag ${x.enabled!==false?'active':''}">${x.enabled!==false?'是':'否'}</span></td><td><div class="table-actions"><button class="text-btn" data-edit-timed="${x.id}">修改</button><button class="text-btn danger" data-del-timed="${x.id}">删除</button></div></td></tr>`).join('');
+    bindManagementActions()
+  }
+  function bindManagementActions(){
+    document.querySelectorAll('[data-edit-student]').forEach(b=>b.onclick=()=>openStudentEdit(+b.dataset.editStudent));document.querySelectorAll('[data-del-student]').forEach(b=>b.onclick=()=>deleteStudent(+b.dataset.delStudent));
+    document.querySelectorAll('[data-edit-param]').forEach(b=>b.onclick=()=>openSimpleEdit('param',b.dataset.editParam));document.querySelectorAll('[data-del-param]').forEach(b=>b.onclick=()=>deleteSimple('param',b.dataset.delParam));
+    document.querySelectorAll('[data-edit-rule]').forEach(b=>b.onclick=()=>openSimpleEdit('rule',b.dataset.editRule));document.querySelectorAll('[data-del-rule]').forEach(b=>b.onclick=()=>deleteSimple('rule',b.dataset.delRule));
+    document.querySelectorAll('[data-edit-reward]').forEach(b=>b.onclick=()=>openSimpleEdit('reward',b.dataset.editReward));document.querySelectorAll('[data-del-reward]').forEach(b=>b.onclick=()=>deleteSimple('reward',b.dataset.delReward));
+    document.querySelectorAll('[data-edit-timed]').forEach(b=>b.onclick=()=>openSimpleEdit('timed',b.dataset.editTimed));document.querySelectorAll('[data-del-timed]').forEach(b=>b.onclick=()=>deleteSimple('timed',b.dataset.delTimed));
+  }
+  function openStudentEdit(id=null){studentEditId=id;const s=id?state.students.find(x=>x.id===id):null;$('#studentEditTitle').textContent=id?'修改学生':'新增学生';$('#studentNameInput').value=s?.name||'';$('#studentGradeInput').value=s?.grade||'二年级';$('#studentPetInput').value=s?.pet||'🐣';$('#studentStatusInput').value=s?.status||'active';open('studentEditModal')}
+  function saveStudentEdit(){const name=$('#studentNameInput').value.trim();if(!name){toast('请输入学生姓名');return}if(studentEditId){const s=state.students.find(x=>x.id===studentEditId);Object.assign(s,{name,grade:$('#studentGradeInput').value,pet:$('#studentPetInput').value.trim()||'🐣',status:$('#studentStatusInput').value})}else{const id=Math.max(0,...state.students.map(x=>x.id))+1;state.students.push({id,name,grade:$('#studentGradeInput').value,pet:$('#studentPetInput').value.trim()||'🐣',status:$('#studentStatusInput').value,scoreDelta:0,redeemed:0,registered:false,bonusGiven:false,routeStartAt:null,routeEndAt:null,tasks:[],ledger:[],redemptions:[]})}save();close('studentEditModal');render();toast(studentEditId?'学生资料已更新':'学生已新增')}
+  function deleteStudent(id){const s=state.students.find(x=>x.id===id);if(!s)return;if(!confirm(`确认删除「${s.name}」？原型中会同时移除其路线和积分演示数据。`))return;state.students=state.students.filter(x=>x.id!==id);save();render();toast('学生已删除')}
+  function openSimpleEdit(type,id=null){simpleEditCtx={type,id};const cfg={param:['参数','参数名称','参数值','例如：每日基础分 / 20'],rule:['积分规则','规则名称','分值','正数加分，负数扣分，如 1、-5'],reward:['兑换奖励','奖励名称','所需积分','填写正整数积分'],timed:['计时任务','任务类型','是否计时','填写 是 或 否']}[type];let item=null;if(id){const list=type==='param'?state.params:type==='rule'?state.pointRules:type==='reward'?state.rewards:state.timedTasks;item=list.find(x=>x.id===id)}$('#simpleEditTitle').textContent=`${id?'修改':'新增'}${cfg[0]}`;$('#simpleNameLabel').textContent=cfg[1];$('#simpleValueLabel').textContent=cfg[2];$('#simpleEditNote').textContent=cfg[3];$('#simpleNameInput').value=item?(type==='rule'?item.label:item.name):'';$('#simpleValueInput').value=item?(type==='param'?item.value:type==='rule'?item.delta:type==='reward'?item.cost:(item.enabled!==false?'是':'否')):'';open('simpleEditModal')}
+  function saveSimpleEdit(){if(!simpleEditCtx)return;const {type,id}=simpleEditCtx,name=$('#simpleNameInput').value.trim(),value=$('#simpleValueInput').value.trim();if(!name||!value){toast('请填写完整');return}let list,key;if(type==='param'){list=state.params;key='p'}else if(type==='rule'){list=state.pointRules;key='r'}else if(type==='reward'){list=state.rewards;key='w'}else{list=state.timedTasks;key='tm'}let item=id?list.find(x=>x.id===id):null;if(!item){item={id:key+Date.now()};list.push(item)}if(type==='param'){item.name=name;item.value=value;if(!item.key)item.key='custom_'+item.id}else if(type==='rule'){const n=Number(value);if(Number.isNaN(n)){toast('分值请输入数字');return}item.label=name;item.delta=n}else if(type==='reward'){const n=Number(value);if(Number.isNaN(n)||n<0){toast('所需积分请输入数字');return}item.name=name;item.cost=n}else{item.name=name;item.enabled=!['否','0','false','不计时'].includes(value.toLowerCase())}applyParams();save();close('simpleEditModal');render();toast(id?'已修改':'已新增')}
+  function deleteSimple(type,id){const map={param:['参数',state.params],rule:['积分规则',state.pointRules],reward:['兑换奖励',state.rewards],timed:['计时任务',state.timedTasks]};const [label,list]=map[type],item=list.find(x=>x.id===id);if(!item)return;if(!confirm(`确认删除「${type==='rule'?item.label:item.name}」？`))return;if(type==='param')state.params=state.params.filter(x=>x.id!==id);if(type==='rule')state.pointRules=state.pointRules.filter(x=>x.id!==id);if(type==='reward')state.rewards=state.rewards.filter(x=>x.id!==id);if(type==='timed')state.timedTasks=state.timedTasks.filter(x=>x.id!==id);applyParams();save();render();toast(`${label}已删除`)}
+  function openScoreDetail(id){rankStudentId=id;const s=state.students.find(x=>x.id===id);if(!s)return;$('#scoreDetailTitle').textContent=`${s.name} · 积分明细`;$('#detailRankScore').textContent=`⭐ ${rankScore(s)}`;$('#detailRedeemed').textContent=`- ${s.redeemed||0}`;$('#detailAvailable').textContent=`⭐ ${availableScore(s)}`;const bonus=s.bonusGiven?(state.settings.finishBonus||0):0;const ledgerSum=(s.ledger||[]).reduce((a,x)=>a+Number(x.delta||0),0);const residual=(s.scoreDelta||0)-bonus-ledgerSum;let rows=[{date:'今天',name:'每日基础分',delta:state.settings.baseScore||20}];if(bonus)rows.push({date:'今天',name:'提前完成奖励',delta:bonus});if(residual)rows.push({date:'今天',name:'其他加扣分',delta:residual});rows.push(...(s.ledger||[]));rows.push(...(s.redemptions||[]).map(x=>({date:x.date||'今天',name:`兑换 · ${x.name}`,delta:-x.cost,redeem:true})));$('#ledgerList').innerHTML=rows.map(x=>`<div class="ledger-row"><div class="ledger-date">${x.date}</div><div class="ledger-name">${x.name}</div><div class="ledger-score ${x.delta>=0?'score-positive':'score-negative'}">${x.delta>0?'+':''}${x.delta}</div></div>`).join('');open('scoreDetailModal')}
+  function openRedeem(id){rankStudentId=id;const s=state.students.find(x=>x.id===id);if(!s)return;$('#redeemTitle').textContent=`${s.name} · 积分兑换`;$('#redeemBalance').textContent=`当前可用积分：⭐ ${availableScore(s)}。兑换只减少可用积分，不影响排行榜成绩。`;$('#redeemList').innerHTML=state.rewards.map(r=>`<div class="reward-choice"><div><strong>${r.name}</strong><span>兑换后可用 ${Math.max(0,availableScore(s)-r.cost)} 分</span></div><div class="cost">⭐ ${r.cost}</div><button class="btn" data-do-redeem="${r.id}" ${availableScore(s)<r.cost?'disabled':''}>兑换</button></div>`).join('');document.querySelectorAll('[data-do-redeem]').forEach(b=>b.onclick=()=>doRedeem(b.dataset.doRedeem));open('redeemModal')}
+  function doRedeem(rewardId){const s=state.students.find(x=>x.id===rankStudentId),r=state.rewards.find(x=>x.id===rewardId);if(!s||!r||availableScore(s)<r.cost)return;if(!confirm(`确认用 ${r.cost} 积分兑换「${r.name}」？`))return;s.redeemed=(s.redeemed||0)+r.cost;s.redemptions.push({date:'今天',name:r.name,cost:r.cost});save();render();openRedeem(s.id);toast('兑换成功')}
+
+  function openTask(id){taskStudentId=id||null;renderTaskSelect();$('#taskModalTitle').textContent=id?'加一个任务':'快速登记作业';open('taskModal')}
+  function openPoint(id){pointStudentId=id;const s=state.students.find(x=>x.id===id);$('#pointTitle').textContent=`给 ${s.name} 加 / 扣积分`;renderPoints();open('pointModal')}
+  function openTime(id,taskId){timeCtx={id,taskId};const s=state.students.find(x=>x.id===id),t=s.tasks.find(x=>x.id===taskId);$('#timeTitle').textContent=`${s.name} · ${t.name} · 实际用时`;$('#actualTimeInput').value=inputTime(t.actualSec);open('timeModal');setTimeout(()=>$('#actualTimeInput').focus(),20)}
+  function open(id){$('#'+id).classList.add('show')}function close(id){$('#'+id).classList.remove('show')}
+  function switchPage(p){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===`page-${p}`));document.querySelectorAll('.menu button').forEach(x=>x.classList.toggle('active',x.dataset.page===p));const titles={home:'今日托管',students:'排行榜',manage:'学生管理',settings:'设置'};$('#pageTitle').textContent=titles[p]||'托管小站';$('#homeTopActions').classList.toggle('hidden',p!=='home')}
+  function render(){applyParams();state.students.forEach(ensure);const d=new Date();$('#todayText').textContent=`${d.getMonth()+1}月${d.getDate()}日`;$('#baseScorePill').textContent=`⭐ 基础${state.settings.baseScore||20}分`;$('#finishBonusPill').textContent=`🏁 ${state.settings.finishBefore||'18:00'}前完成 +${state.settings.finishBonus||0}`;renderHome();renderStudents();renderManagement();renderTaskSelect();renderQuick();renderPoints()}
+  $('#toggleNav').onclick=()=>app.classList.toggle('expanded');document.querySelectorAll('.menu button').forEach(b=>b.onclick=()=>switchPage(b.dataset.page));$('#openRegister').onclick=()=>openTask(null);$('#addStudentBtn').onclick=()=>openStudentEdit();$('#addParamBtn').onclick=()=>openSimpleEdit('param');$('#addRuleBtn').onclick=()=>openSimpleEdit('rule');$('#addRewardBtn').onclick=()=>openSimpleEdit('reward');$('#addTimedBtn').onclick=()=>openSimpleEdit('timed');$('#saveStudentEditBtn').onclick=saveStudentEdit;$('#saveSimpleEditBtn').onclick=saveSimpleEdit;$('#saveTaskBtn').onclick=()=>{const name=$('#taskName').value.trim();if(!name){toast('请输入任务名称');return}addTask(+$(' #taskStudent'.trim()).value,$('#taskSubject').value,name);$('#taskName').value=''};$('#saveTimeBtn').onclick=()=>{if(!timeCtx)return;const sec=parseTime($('#actualTimeInput').value);if(sec==null){toast('请输入例如 5:40');return}const s=state.students.find(x=>x.id===timeCtx.id),t=s.tasks.find(x=>x.id===timeCtx.taskId);t.actualSec=sec;save();close('timeModal');render();toast('实际用时已更新')};document.querySelectorAll('[data-time]').forEach(b=>b.onclick=()=>$('#actualTimeInput').value=b.dataset.time);document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>close(b.dataset.close));document.querySelectorAll('.modal').forEach(m=>m.onclick=e=>{if(e.target===m)m.classList.remove('show')});
+  render();switchPage('home');setInterval(()=>{if(document.getElementById('page-home').classList.contains('active'))renderHome()},1000);
+})();
+</script>
+</body>
+</html>

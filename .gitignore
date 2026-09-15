@@ -36,3 +36,6 @@ out/
 *.swo
 *~
 Thumbs.db
+
+# WorkBuddy 工作区数据（记忆、中间产物，不入库）
+.workbuddy/

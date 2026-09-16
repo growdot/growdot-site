@@ -81,6 +81,16 @@ a{text-decoration:none;color:inherit}button{font:inherit}.wrap{width:min(1180px,
 .contact{padding:86px 0;background:#fffdf7}.contact-box{border-radius:31px;padding:44px;background:linear-gradient(135deg,#191713 0%,#2a2316 50%,#b17c22 180%);color:white;display:grid;grid-template-columns:1fr auto;gap:32px;align-items:center;position:relative;overflow:hidden}.contact-box:after{content:"●";position:absolute;font-size:240px;color:rgba(236,199,105,.06);right:-25px;top:-145px}.contact h2{font-size:38px;margin:0 0 9px}.contact p{color:#bbb2a4;margin:0;max-width:650px}.contact-actions{display:flex;gap:9px;flex-wrap:wrap;position:relative;z-index:2}.contact-actions .btn{white-space:nowrap}
 footer{background:#11100e;color:#827c71;padding:29px 0;font-size:12px}.foot{display:flex;justify-content:space-between;gap:20px;align-items:center}.footlinks{display:flex;gap:18px}
 
+/* qr modal */
+.qrbox{position:fixed;inset:0;z-index:200;background:rgba(20,17,12,.72);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:.2s}
+.qrbox.show{opacity:1;pointer-events:auto}
+.qrbox-inner{position:relative;width:min(90vw,330px);background:#fffdf7;border-radius:24px;padding:28px 26px 22px;text-align:center;box-shadow:0 26px 70px rgba(0,0,0,.4);transform:translateY(14px);transition:.25s}
+.qrbox.show .qrbox-inner{transform:translateY(0)}
+.qrbox-close{position:absolute;top:10px;right:13px;border:0;background:transparent;font-size:24px;line-height:1;color:#8a8378;cursor:pointer}
+.qrbox-title{font-size:19px;font-weight:800;color:#1c1813;margin-bottom:15px}
+.qrbox-img{width:100%;max-width:240px;border-radius:12px;display:block;margin:0 auto;background:#fff;border:1px solid #ece3d2}
+.qrbox-tip{margin-top:13px;font-size:12px;color:#8a8378}
+
 /* modal */
 .modal{position:fixed;inset:0;z-index:100;background:rgba(10,9,8,.68);backdrop-filter:blur(9px);display:none;align-items:center;justify-content:center;padding:20px}.modal.show{display:flex}.modalbox{width:min(520px,100%);background:#fffdf7;border-radius:25px;padding:25px;border:1px solid #e1d7c4;box-shadow:0 30px 100px rgba(0,0,0,.36)}.modalhead{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.modalhead h3{font-size:23px;margin:0}.modalhead p{margin:5px 0 0;color:#797165;font-size:13px}.close{width:36px;height:36px;border-radius:50%;border:1px solid #ddd1bd;background:white;cursor:pointer}
 
@@ -162,9 +172,8 @@ V4 页面结构只有三个一级内容：
 
 <nav class="navbar" id="navbar">
   <div class="wrap navin">
-    <a class="brand" href="#top"><span class="brand-dot"></span><span>金点 <small>GOLD DOT</small></span></a>
+    <a class="brand" href="#top"><span class="brand-dot"></span><span>金点创作实录</span></a>
     <div class="navlinks"><a href="#growth">自主成长工作台</a><a href="#care">托管工作台</a><a href="#method">AI 产品方法</a><a href="#connect">交流</a></div>
-    <div class="nav-actions"><a class="mini-btn gold link-placeholder" href="#">登录</a></div>
   </div>
 </nav>
 
@@ -216,7 +225,7 @@ V4 页面结构只有三个一级内容：
           <div class="module-card"><div class="module-icon">🎁</div><h3>能量小铺</h3><p>完成任务和阅读得到能量，再兑换孩子期待的小奖励，让“今天做到了什么”和奖励发生联系。</p><span class="module-tag">即时反馈</span></div>
         </div>
         <div class="product-proof"><b>从自己孩子的真实使用开始</b><p>这个产品一直在真实家庭场景里做减法和调整。不是先设计完整功能，再找人使用，而是边用边发现哪里复杂、哪里需要更简单。</p></div>
-        <div class="demo-actions"><a class="btn gold" href="demo/kids/pc/">在线体验完整工作台 ↗</a><a class="btn lightghost" href="demo/kids/mobile/">在线体验手机端 ↗</a><a class="btn lightghost link-placeholder" href="#">申请实际试用</a></div>
+        <div class="demo-actions"><a class="btn gold" href="demo/kids/pc/" target="_blank" rel="noopener">在线体验完整工作台 ↗</a><a class="btn lightghost" href="demo/kids/mobile/" target="_blank" rel="noopener">在线体验手机端 ↗</a><a class="btn lightghost link-placeholder" href="#">申请实际试用</a></div>
       </div>
     </div>
   </div>
@@ -242,7 +251,7 @@ V4 页面结构只有三个一级内容：
           <div class="care-feature"><i>🏆</i><b>积分排行</b><span>按天、周、月查看积分与排名，把过程中的努力变成孩子可以看到的激励。</span></div>
         </div>
         <div class="care-proof"><b>已经进入真实托管班试用</b><blockquote>“今天第一天试行，整体都挺顺利🥳”</blockquote></div>
-        <div class="demo-actions"><a class="btn gold" href="demo/care/">在线体验托管工作台 ↗</a><a class="btn darkghost link-placeholder" href="#">机构申请体验</a></div>
+        <div class="demo-actions"><a class="btn gold" href="demo/care/" target="_blank" rel="noopener">在线体验托管工作台 ↗</a><a class="btn darkghost link-placeholder" href="#">机构申请体验</a></div>
       </div>
       <div class="care-screen-v4 reveal"><div class="mock-care-ui"><div class="mock-care-head"><b>托管工作台 · 今日托管</b><span>7个孩子</span></div><div class="mock-student"><div class="mock-kid"><span class="mock-pet">🐼</span>小宇</div><div class="mock-care-route"></div><div class="mock-status">进行中</div></div><div class="mock-student"><div class="mock-kid"><span class="mock-pet">🦊</span>安安</div><div class="mock-care-route"></div><div class="mock-status wait">等待订正</div></div><div class="mock-student"><div class="mock-kid"><span class="mock-pet">🐰</span>果果</div><div class="mock-care-route"></div><div class="mock-status done">已完成</div></div><div class="mock-student"><div class="mock-kid"><span class="mock-pet">🐯</span>朵朵</div><div class="mock-care-route"></div><div class="mock-status">进行中</div></div><div class="mock-student"><div class="mock-kid"><span class="mock-pet">🐨</span>一一</div><div class="mock-care-route"></div><div class="mock-status wait">等待订正</div></div><div class="mock-student"><div class="mock-kid"><span class="mock-pet">🐸</span>可可</div><div class="mock-care-route"></div><div class="mock-status">进行中</div></div></div></div>
     </div>
@@ -274,13 +283,29 @@ V4 页面结构只有三个一级内容：
 <section class="contact-v4" id="connect">
   <div class="wrap contact-v4-box reveal">
     <div><div class="label" style="color:#dfbf69">KEEP IN TOUCH</div><h2>体验、交流和后续更新，都从这里找到入口。</h2><p>你可以把公众号文章、交流群、产品试用和正式系统链接都统一放在这个网站里，后续只维护这里。</p></div>
-    <div class="contact-v4-actions"><a class="btn gold link-placeholder" href="#">关注公众号</a><a class="btn darkghost link-placeholder" href="#">加入交流群</a><a class="btn darkghost link-placeholder" href="#">联系我</a></div>
+    <div class="contact-v4-actions"><a class="btn gold link-placeholder" href="#" onclick="showQR('公众号','assets/img/gongzhonghao.jpg');return false;">关注公众号</a><a class="btn darkghost link-placeholder" href="#" onclick="showQR('交流群','assets/img/group.jpg');return false;">加入交流群</a><a class="btn darkghost link-placeholder" href="#" onclick="showQR('联系我','assets/img/weixin.jpg');return false;">联系我</a></div>
   </div>
 </section>
 
 <footer><div class="wrap foot"><div>© 2026 金点 GOLD DOT · 把真实问题，慢慢做成产品。</div><div class="footlinks"><a href="#growth">自主成长工作台</a><a href="#care">托管工作台</a><a href="#method">AI 产品方法</a></div></div></footer>
 
+<div class="qrbox" id="qrBox" onclick="if(event.target===this)closeQR()">
+  <div class="qrbox-inner">
+    <button class="qrbox-close" onclick="closeQR()" aria-label="关闭">×</button>
+    <div class="qrbox-title" id="qrBoxTitle">公众号</div>
+    <img class="qrbox-img" id="qrBoxImg" src="" alt="二维码"/>
+    <div class="qrbox-tip">扫码或长按识别</div>
+  </div>
+</div>
+
 <script>
+function showQR(title,src){
+  document.getElementById('qrBoxTitle').textContent=title;
+  document.getElementById('qrBoxImg').src=src;
+  document.getElementById('qrBox').classList.add('show');
+}
+function closeQR(){document.getElementById('qrBox').classList.remove('show');}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeQR();});
 document.querySelectorAll('a.link-placeholder').forEach(a=>a.addEventListener('click',e=>{if(a.getAttribute('href')==='#')e.preventDefault()}));
 const navbar=document.getElementById('navbar');
 window.addEventListener('scroll',()=>navbar.classList.toggle('light',window.scrollY>window.innerHeight*.72));
